@@ -1,7 +1,6 @@
 import { Address, toNano, beginCell } from '@ton/core';
 import { NetworkProvider } from '@ton/blueprint';
 import { CONTRACTADDRESS } from './!YOURCONTRACTADDRESS';
-import { LotteryContract } from '../wrappers/LotteryContract';
 
 export async function run(provider: NetworkProvider) {
     const jettonWalletAddress = Address.parseRaw('0:9eb8abe2750e07bf4644ed33e7ecaeb510e8a42487c55beb27ee724ae26c0fdf');

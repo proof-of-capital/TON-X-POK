@@ -17,8 +17,7 @@ export async function run(provider: NetworkProvider) {
             value: toNano('0.01'), 
         },
         {
-            $$type: 'ChangePrices',
-            newticketUSDTPrice: 0n,
+            $$type: 'ChangePrice',
             newticketPOKPrice: 2000n
         }
     );

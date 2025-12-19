@@ -6,13 +6,11 @@
 
 // (c) 2025 https://proofofcapital.org/
 
-
-import "@stdlib/deploy";
-import "@stdlib/ownable";
 import "./messages";
+import "./storage_contract";
 
-contract RoundContract with Ownable {
-    owner: Address;
+contract RoundContract {
+    xpok: Address;
     indexGame: Int as uint16;
     prizeFund: Int as coins;
 
@@ -114,8 +112,8 @@ contract RoundContract with Ownable {
 
     currentLevel: Int as uint16 = 0;
 
-    init(owner: Address, indexGame: Int) {
-        self.owner = owner;
+    init(xpok: Address, indexGame: Int) {
+        self.xpok = xpok;
         self.indexGame = indexGame;
         self.prizeFund = 0;
         self.addPrize = 0;
@@ -127,29 +125,38 @@ contract RoundContract with Ownable {
         self.totalTickets = 0;
     }
 
-    receive("balance") {
-        self.requireOwner();
-        if (myBalance() > COMMISSION) {
-            let value: Int = myBalance() - COMMISSION;
-            send(SendParameters{
+    receive(msg: WithdrawFromRound) {
+        throwUnless(401, sender() == self.xpok);
+        message(MessageParameters{
                 to: sender(),
-                value: value,
-                body: "balance from round".asComment()
-            });
-        }
+                value: 0,
+                mode: SendRemainingBalance | SendIgnoreErrors,
+        });        
     }
 
+    /*receive("balance") {
+        throwUnless(401, sender() == self.xpok);
+        if (myBalance() > COMMISSION) {
+            let value: Int = myBalance() - COMMISSION;
+            message(MessageParameters{
+                to: sender(),
+                value: value,
+                //body: "balance from round".asComment()
+            });
+        }
+    }*/
+
     receive(msg: StartValues) {
-        self.requireOwner();
+        throwUnless(401, sender() == self.xpok);
         self.levelIndex = msg.levelIndex;
         self.lastLevelIndex = msg.levelIndex;
         self.winningProbability = msg.winningProbability;
     }
 
     receive(msg: PrizePoolForRound) {
-        self.requireOwner();
+        throwUnless(401, sender() == self.xpok);
         self.prizeFund = msg.amount > 0 ? msg.amount : 1; 
-        self.addPrize = msg.addPrize > 0 ? msg.addPrize : 1; // защиты от нуля
+        self.addPrize = msg.addPrize;
         self.ticketsSold = msg.ticketsSold > 0 ? msg.ticketsSold : 1; 
         self.ticketsWin = msg.ticketsWin > 0 ? msg.ticketsWin : 1;
         self.getWinners(msg.amount);
@@ -157,14 +164,14 @@ contract RoundContract with Ownable {
     }
 
     receive(msg: TicketsForFullWin) {
-        let amount: Int = self.checkWin(msg.tickets);
-
-        send(SendParameters{
+        let init: StateInit = initOf StorageContract(self.xpok, msg.participant);
+        throwUnless(401, sender() == contractAddress(init));
+        message(MessageParameters{
             to: sender(),
             value: COMMISSION,
             body: SendWinForFull {
-                amount: amount,
-                index: self.indexGame
+                amount: self.checkWin(msg.tickets),
+                index: self.indexGame,
             }.toCell(),
         });
     }
@@ -235,9 +242,10 @@ contract RoundContract with Ownable {
             self.winnersNum16 = numWinners;
             self.winnersAmount16 = amount;
         }
+        self.winnersCount += 1; // кажется это тут должно быть
     }
 
-    fun checkWin(tickets: Int): Int {
+    inline fun checkWin(tickets: Int): Int {
         let amount: Int = 0;
         let checkAddWin: Int = tickets + self.totalTickets;
         if (self.allWinners > 0) {
@@ -253,7 +261,7 @@ contract RoundContract with Ownable {
         return amount;
     }
 
-    fun foundLevel(ticket: Int): Int { 
+    inline fun foundLevel(ticket: Int): Int { 
         let total: Int = self.allWinners;        
         if (total - self.winnersNum16 < ticket) {
             self.winnersNum16 -= 1;
@@ -515,7 +523,7 @@ contract RoundContract with Ownable {
         return;
     }
 
-    fun checkAddWin(ticket: Int): Int {
+    inline fun checkAddWin(ticket: Int): Int {
         let amount: Int = 0;
 
         if (self.addWinnersNum1 == ticket) {
@@ -571,11 +579,12 @@ contract RoundContract with Ownable {
         return amount;
     }
 
-    fun getWinners(amount: Int) { 
+    inline fun getWinners(amount: Int) { 
         let prizeFund: Int = amount;
         let levelIndex: Int = self.levelIndex;
         let tickSold: Int = self.ticketsWin * self.winningProbability;
         let remainingWinners: Int = self.ticketsWin;
+        //dump(remainingWinners);
         let currentWinners: Int = 0;
         let ticketPOKPrice: Int = amount / tickSold;
         let iteration: Int = 1;
@@ -600,10 +609,14 @@ contract RoundContract with Ownable {
             remainingWinners -= currentWinners;
             levelIndex += 1;
             iteration += 1;
+            //dump(remainingWinners);
         }
     }
 
-    fun getAddWinners() {
+    inline fun getAddWinners() {
+        if(self.addPrize == 0) {
+            return;
+        }
         let prize: Int = self.addPrize;
         let remainingPrize: Int = prize;
         let price: Int = self.prizeFund / (self.ticketsWin * self.winningProbability);
@@ -619,7 +632,7 @@ contract RoundContract with Ownable {
     }
 
     get fun check_owner(): Address {
-        return self.owner;
+        return self.xpok;
     }
 
     get fun index_game(): Int {
