@@ -1,73 +1,8 @@
 {
-  "0x9ed5b44b8c793ca58efb9728f7d4b82b8d2ee1db1844711b5e42c0f8741599cf": "XPOK",
-  "0x464bc9c896d4807a37b523eeb407e87f30ffbcfc4287533b6015d2deb04592dd": "XPOK",
-  "0xcf23704e75904523eda42978fcfb585a3d17ef11de3c875ebf8396dd9100e957": "XPOK",
-  "0x32d6889161d672c2d692e7afdd03c1e248f074706097ce066681ec3b36d8a400": "XPOK",
-  "0x4af68f4c1a8ac5df0eac47bba329b22b3e03ca845d5ca02130e07ce52f603469": "XPOK",
-  "0x22f1e3de097c01798c735e097c28cffff353702aee82624311a7e354bcd349bd": "XPOK",
-  "0x3cfc95044bf44297a41e8e4d5d1aa75ee25cd57e4793b9a3dcf9cffca196c78b": "XPOK",
-  "0x7991070efddd76d9c62a32345c2f2f1b1f1905a78e4ee56a212c5ba4cd6eb210": "XPOK",
-  "0x35df5a27abb4c58bc6b5403784cf62b2b8ded6f3d1bfe8ed69d656b5731af735": "XPOK",
-  "0xd4829eca843ffa877ace1c064457bd4a49afc54991b03380e22365315b6c9860": "XPOK",
-  "0xa38a34d3d803d4587b25d065b455496fc974a236b1a3d64341976ff50e9b17f1": "XPOK",
-  "0x592081136ae35a408efd554c5ae2aa1c9a9a609091f987260dbb5e4b4f14c5c8": "XPOK",
-  "0xa81b9ccb73b5021efa26a8fe150829a3bae63dbb1a544f7c9021f2cf00ec1870": "XPOK",
-  "0xc243b4ff0c99e8cf733194b5f0f586c69482cdc54f4faba15e44adaffcbda494": "XPOK",
-  "0x85d3813a75cdaefa8f3fb2fafef56b2bb20bb08f05511b3102ffd8626125bd95": "XPOK",
-  "0x5f9f90c7718d1370fa17edb16b17bde79f1802f8865f5f85509109be22405642": "XPOK",
-  "0xc33bf2621a05b1580f48b1ca2e20c3473cb87040a0ec1bc432f1205d1c49cd36": "XPOK",
-  "0x154737d476aaa40bd4a92bc0ee9bf37c676007dec538df17bbdb5798584a779c": "XPOK",
-  "0xa8cc2b029e9d1fd1c3bc554b4fcb07cbd9592d45c9147f330ab3499da0d5e07c": "XPOK",
-  "0x7c0df951b2ddee9e6fbf9158b7787596af66c4f76d01d29edb4d7eab9e5e0ce2": "XPOK",
-  "0x54043822bc69cf0f373620532025cc73ba3016627937aad123746fa5d6b24672": "XPOK",
-  "0x5ff7df9bad6d2726e9ae360699cb3d33e695b553fdcb7094400c08c053e273cc": "XPOK",
-  "0x415734d5be7f089834e884b6d3fb02fe266e34c13543b6a4729b816935055b23": "XPOK",
-  "0x163a91622d62d49c9d847bd48a9e722ba0fa7348b82b7fa5f5b4cc47419e0d64": "XPOK",
-  "0x4131efeeee4906860cb9a015c34c16fdcb38ab9d5dccd1b571b471fb07bb6a84": "XPOK",
+  "0xb3588d5314b7fb2c8fc1cac3fb4bc0a22bdfc102fc7ac8c9cae0a9db8467856c": "XPOK",
+  "0x346360e282bbb2cd378ee6a0990c96d856d819b9b58e36a3af89136dd18403b3": "XPOK",
   "XPOK": {
     "receivers": [
-      {
-        "receiver": "internal",
-        "message": {
-          "kind": "typed",
-          "type": "0x1"
-        }
-      },
-      {
-        "receiver": "internal",
-        "message": {
-          "kind": "typed",
-          "type": "0x3"
-        }
-      },
-      {
-        "receiver": "internal",
-        "message": {
-          "kind": "typed",
-          "type": "0x9"
-        }
-      },
-      {
-        "receiver": "internal",
-        "message": {
-          "kind": "typed",
-          "type": "notSupported"
-        }
-      },
-      {
-        "receiver": "internal",
-        "message": {
-          "kind": "typed",
-          "type": "0x1a"
-        }
-      },
-      {
-        "receiver": "internal",
-        "message": {
-          "kind": "typed",
-          "type": "0x7362d09c"
-        }
-      },
       {
         "receiver": "internal",
         "message": {
@@ -93,35 +28,81 @@
         "receiver": "internal",
         "message": {
           "kind": "typed",
+          "type": "0x1"
+        }
+      },
+      {
+        "receiver": "internal",
+        "message": {
+          "kind": "typed",
+          "type": "0x9"
+        }
+      },
+      {
+        "receiver": "internal",
+        "message": {
+          "kind": "typed",
+          "type": "0x7362d09c"
+        }
+      },
+      {
+        "receiver": "internal",
+        "message": {
+          "kind": "typed",
           "type": "0xf"
+        }
+      },
+      {
+        "receiver": "internal",
+        "message": {
+          "kind": "typed",
+          "type": "0x19"
+        }
+      },
+      {
+        "receiver": "internal",
+        "message": {
+          "kind": "typed",
+          "type": "0xb"
+        }
+      },
+      {
+        "receiver": "internal",
+        "message": {
+          "kind": "typed",
+          "type": "0xc"
+        }
+      },
+      {
+        "receiver": "internal",
+        "message": {
+          "kind": "typed",
+          "type": "0xd"
+        }
+      },
+      {
+        "receiver": "internal",
+        "message": {
+          "kind": "typed",
+          "type": "notSupported"
+        }
+      },
+      {
+        "receiver": "internal",
+        "message": {
+          "kind": "typed",
+          "type": "0xe"
+        }
+      },
+      {
+        "receiver": "internal",
+        "message": {
+          "kind": "typed",
+          "type": "0xf8a7ea5"
         }
       }
     ],
     "types": [
-      {
-        "name": "0x1",
-        "header": 1
-      },
-      {
-        "name": "0x3",
-        "header": 3
-      },
-      {
-        "name": "0x9",
-        "header": 9
-      },
-      {
-        "name": "notSupported",
-        "header": 4294967295
-      },
-      {
-        "name": "0x1a",
-        "header": 26
-      },
-      {
-        "name": "0x7362d09c",
-        "header": 1935855772
-      },
       {
         "name": "0xd1735400",
         "header": 3513996288
@@ -135,8 +116,48 @@
         "header": 16
       },
       {
+        "name": "0x1",
+        "header": 1
+      },
+      {
+        "name": "0x9",
+        "header": 9
+      },
+      {
+        "name": "0x7362d09c",
+        "header": 1935855772
+      },
+      {
         "name": "0xf",
         "header": 15
+      },
+      {
+        "name": "0x19",
+        "header": 25
+      },
+      {
+        "name": "0xb",
+        "header": 11
+      },
+      {
+        "name": "0xc",
+        "header": 12
+      },
+      {
+        "name": "0xd",
+        "header": 13
+      },
+      {
+        "name": "notSupported",
+        "header": 4294967295
+      },
+      {
+        "name": "0xe",
+        "header": 14
+      },
+      {
+        "name": "0xf8a7ea5",
+        "header": 260734629
       }
     ],
     "name": "XPOK"

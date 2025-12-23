@@ -6,7 +6,7 @@
       "path": "contracts/x_p_o_k.tact",
       "output": "build/XPOK",
       "options": {
-        "debug": true
+        "debug": false
       },
       "mode": "full"
     }

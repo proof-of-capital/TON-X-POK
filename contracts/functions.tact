@@ -8,7 +8,7 @@ fun sendTon(to: Address, value: Int, comment: String) {
     message(MessageParameters{
         to: to,
         value: value,
-        bounce: true,
+        bounce: false,
         mode: SendPayFwdFeesSeparately,
         body: comment.asComment()
     });

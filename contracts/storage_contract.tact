@@ -9,6 +9,12 @@ import "./messages";
 import "./round_contract";
 
 const ONE_TICKET_GAS_USED: Int = 20_000;
+const TICKETS_PER_TRANSACTION: Int = 50;
+
+struct RoundTicketInfo {
+    roundId: Int as uint16;
+    ticketsCount: Int as uint16;
+}
 
 contract StorageContract {
     xpok: Address;
@@ -35,8 +41,6 @@ contract StorageContract {
     receive(msg: GetWin) {
         throwUnless(401, sender() == self.xpok);
         try {
-            //dump(self.fullWin > 0);
-            //dump(context().value >= COMMISSION * 2);
             require(self.fullWin > 0, "You have no jettons");
             require(context().value >= COMMISSION * 2, "Not enough TONs to cover commission");
             let value: Int = COMMISSION * 2;
@@ -74,21 +78,24 @@ contract StorageContract {
             throwUnless(401, sender() == self.xpok);
             throwUnless(555, self.lock + 300 < now());
             require(self.winTickets != emptyMap(), "You have no tickets");
-            let commission: Int = self.calculateTotalCommission();
-            require(context().value >= commission + COMMISSION * 2, "Not enough TONs to cover commission");
-            foreach (key, value in self.winTickets) {
-                if (value > 0) {
-                    message(MessageParameters{
-                        to: contractAddress(initOf RoundContract(self.xpok, key)),
-                        value: calculateCommission(value),
-                        body: TicketsForFullWin {
-                            participant:self.participant,
-                            tickets: value,
-                        }.toCell(),
-                    });
-                    self.lock = now();
-                }
-            }        
+            let firstAvailableRoundInfo: RoundTicketInfo?  = self.getFirstAvailableRoundInfo();
+            let ticketsToClaim = min(firstAvailableRoundInfo!!.ticketsCount, TICKETS_PER_TRANSACTION);
+            let commission: Int = calculateCommission(ticketsToClaim);
+            require(context().value >= commission + COMMISSION, "Not enough TONs to cover commission");
+            let toLeaveOnBalance = (myBalance() - context().value) + myStorageDue();
+            nativeReserve(toLeaveOnBalance, ReserveAtMost);
+            if (ticketsToClaim > 0) {
+                message(MessageParameters{
+                    to: contractAddress(initOf RoundContract(self.xpok, firstAvailableRoundInfo!!.roundId)),
+                    value: 0,
+                    body: TicketsForFullWin {
+                        participant:self.participant,
+                        tickets: ticketsToClaim,
+                    }.toCell(),
+                    mode: SendRemainingBalance,
+                });
+                self.lock = now();
+            }                
         } catch (_) {
             let value: Int = context().value - COMMISSION;
             message(MessageParameters{
@@ -105,38 +112,70 @@ contract StorageContract {
         let init: StateInit = initOf RoundContract(self.xpok, msg.index);
         throwUnless(401, sender() == contractAddress(init));
         self.fullWin += msg.amount;
-        let value: Int = COMMISSION * 2;
-        if (myBalance() > value) {
-            message(MessageParameters{
-                    to: self.xpok,
-                    value: value,
-                    mode: SendPayFwdFeesSeparately,
-                    body: FullWin {
-                        amount: self.fullWin,
-                        participant: self.participant
+        let ticketsForRound: Int? = self.winTickets.get(msg.index); // сколько билетов сейчас на указанном раунде
+        if(ticketsForRound != null ){ // если билеты есть
+            let newTicketsCount: Int = ticketsForRound!! - msg.tickets; // сколько останется после обработки этого сообщения
+            if( newTicketsCount > 0 ){ // если что-то осталось, обновляем значение
+                self.winTickets.set(msg.index, newTicketsCount);
+            } else { // если ничего не осталось, удаляем запись
+                let _ = self.winTickets.del(msg.index);
+                self.mapLen -= 1;
+            }
+        }
+        self.lock = 0; // сбрасываем блокировку после получения выигрыша
+        // смотрим есть ли еще раунды с билетами
+        let firstAvailableRoundInfo: RoundTicketInfo?  = self.getFirstAvailableRoundInfo();
+        if (firstAvailableRoundInfo != null) { // если такой раунд нашёлся
+            // отправляем запрос на получение выигрыша за следующий раунд
+            // берём либо сколько осталось, либо максимум за раз
+            let ticketsToClaim = min(firstAvailableRoundInfo!!.ticketsCount, TICKETS_PER_TRANSACTION);
+            let commission: Int = calculateCommission(ticketsToClaim);
+            if (myBalance() > commission + COMMISSION) { // если хватает баланса на комиссию
+                let toLeaveOnBalance = (myBalance() - context().value) + myStorageDue();
+                nativeReserve(toLeaveOnBalance, ReserveAtMost);
+                message(MessageParameters{
+                    to: contractAddress(initOf RoundContract(self.xpok, firstAvailableRoundInfo!!.roundId)),
+                    value: 0,
+                    body: TicketsForFullWin {
+                        participant:self.participant,
+                        tickets: ticketsToClaim,
                     }.toCell(),
+                    mode: SendRemainingBalance,
                 });
-            let _ = self.winTickets.del(msg.index);
-            self.mapLen -= 1;
-            self.fullWin = 0;
-            self.lock = 0;
-        }  else{
-            self.fullWin -= msg.amount;
+                self.lock = now(); // ставим блокировку
+            }
+        }else{ // если раундов больше нет, отправляем полный выигрыш, если хватает комиссии
+            self.sendFullWin(); 
         }      
     }
 
-    inline fun calculateTotalCommission(): Int {
-        let total: Int = 0;
-        foreach (key, value in self.winTickets) {
-            if (value > 0) {
-                total += (value * ONE_TICKET_GAS_USED * ton("0.01")) / ONE_TICKET_GAS_USED;
-            }
-        }
-        total += COMMISSION;
-        return total;
+    inline fun sendFullWin() {
+        let value: Int = COMMISSION * 2;
+        if (myBalance() > value) {
+            message(MessageParameters{
+                to: self.xpok,
+                value: value,
+                mode: SendPayFwdFeesSeparately,
+                body: FullWin {
+                        amount: self.fullWin,
+                        participant: self.participant
+                        }.toCell(),
+                });
+            self.fullWin = 0;
+        }  
     }
 
-    
+    fun getFirstAvailableRoundInfo(): RoundTicketInfo? {
+        foreach (roundId, ticketsCount in self.winTickets) {
+            if (ticketsCount > 0) {
+                return RoundTicketInfo{
+                    roundId: roundId,
+                    ticketsCount: ticketsCount
+                };
+            }
+        }
+        return null; // вернём нул если прошлись по всем, но раунд с билетами не нашли
+    }
 
     get fun full_win(): Int {
         return self.fullWin / NANO_COINS_VALUES;

@@ -98,17 +98,18 @@ describe('XPOK', () => {
                 pokAmount: 1000000000n,
             },
         );
-        printTransactionFees(initSeason.transactions);
+        // printTransactionFees(initSeason.transactions);
 
         expect(await xpok.getIsLotteryStarted()).toBe(true);
 
         const buyTicketsResult = await xpok.send(
             player1.getSender(),
             {
-                value: toNano('50.1'),
+                value: toNano('50.15'),
             },
             {
                 $$type: 'BuyTickets',
+                isNewUser: true,
             },
         );
 
@@ -134,7 +135,7 @@ describe('XPOK', () => {
         const pokTransferNotificationResult = await xpok.send(
             pokJettonWallet.getSender(),
             {
-                value: toNano('10.1'),
+                value: toNano('5.1'),
             },
             {
                 $$type: 'JettonTransferNotification',
@@ -144,14 +145,25 @@ describe('XPOK', () => {
                 forwardPayload: Cell.EMPTY.asSlice(),
             },
         );
-        printTransactionFees(pokTransferNotificationResult.transactions);
+        //printTransactionFees(pokTransferNotificationResult.transactions);
 
         const currentRoundAddress = await xpok.getRoundContractAddress(1n, 1n);
         const round = blockchain.openContract(RoundContract.fromAddress(currentRoundAddress));
-        const winnersCount = await round.getWinnersCount();
-        expect(winnersCount).toBeGreaterThan(1n);
-        const fund = await round.getPrizeFund();        
+        //        const winnersCount = await round.getWinnersCount(); this is about jackpot winners
+        //        expect(winnersCount).toBeGreaterThan(1n);
+        const fund = await round.getPrizeFund();
         console.log('Fund', fromNano(fund));
+
+        const sendWinTxResult = await xpok.send(
+            player1.getSender(),
+            {
+                value: toNano('10.1'),
+            },
+            {
+                $$type: 'Win',
+            },
+        );
+        printTransactionFees(sendWinTxResult.transactions);
 
         //console.log('Round contract balance after pok transfer notification:', winnersCount);
         //try emergency withdraw

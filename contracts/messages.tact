@@ -26,59 +26,62 @@ message(0x7362d09c) JettonTransferNotification {
     forwardPayload: Slice as remaining;
 }
 
-message(1) BuyTickets {}
+message(0x1) BuyTickets {
+    isNewUser: Bool;
+}
 
-message(2) ChangePrice {
+message(0x2) ChangePrice {
     newticketPOKPrice: Int;
 }
 
-message(3) StartStopLottery {
+message(0x3) StartStopLottery {
     isLotteryStarted: Bool;
 }
 
-message(4) WithdrawAllTons {}
-message(5) WTHCoinsBalances {}
+message(0x4) WithdrawAllTons {}
+message(0x5) WTHCoinsBalances {}
 
-message(6) WTHPOKDebug {
+message(0x6) WTHPOKDebug {
     pokAmount: Int? as coins;
 }
 
-message(7) WTHUSDTDebug {
+message(0x7) WTHUSDTDebug {
     usdtAmount: Int? as coins;
 }
 
-message(8) NewStartDate {
+message(0x8) NewStartDate {
     newStartDate: Int;
 }
 
-message(9) Winners {
+message(0x9) Winners {
     indexGame: Int as uint16;
     winTickets: Int as uint16;
 }
 
-message(10) SendWinPerRound {
+message(0xa) SendWinPerRound {
     amount: Int;
     participant: Address;
 }
 
-message(11) GetFullWin {}
+message(0xb) GetFullWin {}
 
-message(12) TicketsForFullWin {
+message(0xc) TicketsForFullWin {
     participant: Address;
     tickets: Int as uint16;
 }
 
-message(13) SendWinForFull {
+message(0xd) SendWinForFull {
     amount: Int as coins;
     index: Int as uint16;
+    tickets: Int as uint16;
 }
 
-message(14) FullWin {
+message(0xe) FullWin {
     amount: Int as coins;
     participant: Address;
 }
 
-message(15) PrizePoolForRound {
+message(0xf) PrizePoolForRound {
     amount: Int as coins;
     addPrize: Int as coins;
     ticketsSold: Int as uint16;
@@ -92,45 +95,45 @@ message(15) PrizePoolForRound {
 //     ticketsWin: Int as uint16;
 // }
 
-message(16) StartValues {
+message(0x10) StartValues {
     levelIndex: Int as uint8;
     winningProbability: Int as uint8;
 }
 
-message(17) AddAdditionalJettonData {
+message(0x11) AddAdditionalJettonData {
     newAdditionalJettonMasterAddress: Address;
     newAdditionalJettonWalletAddress: Address;
     amount: Int as coins;
 }
 
-message(18) ChangeMarketMaker {
+message(0x12) ChangeMarketMaker {
     newMarketMakerAddress: Address;
 }
 
-message(19) ChangeRoyalty {
+message(0x13) ChangeRoyalty {
     newRoyaltyAddress: Address;
 }
 
-message(20) NewOwner {
+message(0x14) NewOwner {
     newOwnerAddress: Address;
 }
 
-message(21) ChangeLastGameIndex {
+message(0x15) ChangeLastGameIndex {
     newLastGameIndex: Int as uint16;
 }
 
-message(22) ExtendLockTimeByDays {
+message(0x16) ExtendLockTimeByDays {
     additionalDays: Int as uint8;
 }
 
-message(23) InitializeSeason {
+message(0x17) InitializeSeason {
     pokAmount: Int as coins;
 }
 
-message(24) WithdrawFromRound {
+message(0x18) WithdrawFromRound {
     roundId: Int as uint16;
 }
 
-message(25) Win {}
+message(0x19) Win {}
 
-message(26) GetWin {}
+message(0x20) GetWin {}

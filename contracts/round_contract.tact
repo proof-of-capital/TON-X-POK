@@ -17,7 +17,7 @@ contract RoundContract {
     addPrize: Int as coins;
 
     ticketsSold: Int as uint16;
-    ticketsWin: Int as uint16;
+    ticketsWin: Int as uint16; //кол-во выигрышных билетов в раунде?
 
     lastLevelIndex: Int as uint8;
     levelIndex: Int as uint8;
@@ -127,24 +127,13 @@ contract RoundContract {
 
     receive(msg: WithdrawFromRound) {
         throwUnless(401, sender() == self.xpok);
+        nativeReserve(COMMISSION, ReserveAtMost);
         message(MessageParameters{
                 to: sender(),
                 value: 0,
                 mode: SendRemainingBalance | SendIgnoreErrors,
         });        
     }
-
-    /*receive("balance") {
-        throwUnless(401, sender() == self.xpok);
-        if (myBalance() > COMMISSION) {
-            let value: Int = myBalance() - COMMISSION;
-            message(MessageParameters{
-                to: sender(),
-                value: value,
-                //body: "balance from round".asComment()
-            });
-        }
-    }*/
 
     receive(msg: StartValues) {
         throwUnless(401, sender() == self.xpok);
@@ -158,7 +147,7 @@ contract RoundContract {
         self.prizeFund = msg.amount > 0 ? msg.amount : 1; 
         self.addPrize = msg.addPrize;
         self.ticketsSold = msg.ticketsSold > 0 ? msg.ticketsSold : 1; 
-        self.ticketsWin = msg.ticketsWin > 0 ? msg.ticketsWin : 1;
+        self.ticketsWin = msg.ticketsWin > 0 ? msg.ticketsWin : 1;       
         self.getWinners(msg.amount);
         self.getAddWinners();
     }
@@ -166,12 +155,16 @@ contract RoundContract {
     receive(msg: TicketsForFullWin) {
         let init: StateInit = initOf StorageContract(self.xpok, msg.participant);
         throwUnless(401, sender() == contractAddress(init));
+        let toLeaveOnBalance = (myBalance() - context().value) + myStorageDue();
+        nativeReserve(toLeaveOnBalance, ReserveAtMost);
         message(MessageParameters{
             to: sender(),
-            value: COMMISSION,
+            value: 0,
+            mode: SendRemainingBalance,
             body: SendWinForFull {
                 amount: self.checkWin(msg.tickets),
                 index: self.indexGame,
+                tickets: msg.tickets
             }.toCell(),
         });
     }
@@ -242,20 +235,21 @@ contract RoundContract {
             self.winnersNum16 = numWinners;
             self.winnersAmount16 = amount;
         }
-        self.winnersCount += 1; // кажется это тут должно быть
     }
 
     inline fun checkWin(tickets: Int): Int {
         let amount: Int = 0;
-        let checkAddWin: Int = tickets + self.totalTickets;
         if (self.allWinners > 0) {
             while (tickets > 0) {
                 let winner: Int = random(1, self.allWinners + 1);
                 amount += self.foundLevel(winner);
                 self.totalTickets += 1;
-                amount += checkAddWin >= self.currentLevel && self.currentLevel > 0 ? self.checkAddWin(self.currentLevel) : 0;
                 tickets -= 1;
-                self.ticketsWin -= 1;
+                self.ticketsWin -= 1;                
+            }
+            if(self.addPrize > 1) {
+                let checkAddWin: Int = tickets + self.totalTickets;                
+                amount += self.checkAddWin(checkAddWin);
             }
         }
         return amount;
@@ -526,52 +520,78 @@ contract RoundContract {
     inline fun checkAddWin(ticket: Int): Int {
         let amount: Int = 0;
 
-        if (self.addWinnersNum1 == ticket) {
+        if (self.addWinnersNum1 <= ticket) {
             amount += self.addWinnersAmount1;
             self.addWinnersNum1 = 0;
             self.currentLevel = self.addWinnersNum2;
-        } 
-        if (self.addWinnersNum2 == ticket) {
+        } else {
+            return amount;
+        }
+
+        if (self.addWinnersNum2 <= ticket) {
             amount += self.addWinnersAmount2;
             self.addWinnersNum2 = 0;
             self.currentLevel = self.addWinnersNum3;
+        } else {
+            return amount;
         }
-        if (self.addWinnersNum3 == ticket) {
+
+        if (self.addWinnersNum3 <= ticket) {
             amount += self.addWinnersAmount3;
             self.addWinnersNum3 = 0;
             self.currentLevel = self.addWinnersNum4;
+        } else {
+            return amount;
         }
-        if (self.addWinnersNum4 == ticket) {
+
+        if (self.addWinnersNum4 <= ticket) {
             amount += self.addWinnersAmount4;
             self.addWinnersNum4 = 0;
             self.currentLevel = self.addWinnersNum5;
+        } else {
+            return amount;
         }
-        if (self.addWinnersNum5 == ticket) {
+
+        if (self.addWinnersNum5 <= ticket) {
             amount += self.addWinnersAmount5;
             self.addWinnersNum4 = 0;
             self.currentLevel = self.addWinnersNum6;
+        } else {
+            return amount;
         }
-        if (self.addWinnersNum6 == ticket) {
+
+        if (self.addWinnersNum6 <= ticket) {
             amount = self.addWinnersAmount6;
             self.addWinnersNum6 = 0;
             self.currentLevel = self.addWinnersNum7;
+        } else {
+            return amount;
         }
-        if (self.addWinnersNum7 == ticket) {
+
+        if (self.addWinnersNum7 <= ticket) {
             amount = self.addWinnersAmount7;
             self.addWinnersNum7 = 0;
             self.currentLevel = self.addWinnersNum8;
+        } else {
+            return amount;
         }
-        if (self.addWinnersNum8 == ticket) {
+
+        if (self.addWinnersNum8 <= ticket) {
             amount = self.addWinnersAmount8;
             self.addWinnersNum8 = 0;
             self.currentLevel = self.addWinnersNum9;
+        } else {
+            return amount;
         }
-        if (self.addWinnersNum9 == ticket) {
+
+        if (self.addWinnersNum9 <= ticket) {
             amount = self.addWinnersAmount9;
             self.addWinnersNum9 = 0;
             self.currentLevel = self.addWinnersNum10;
+        } else {
+            return amount;
         }
-        if (self.addWinnersNum10 == ticket) {
+        if (self.addWinnersNum10 <= ticket) {
             amount = self.addWinnersAmount10;
             self.addWinnersNum10 = 0;
             self.currentLevel = 0;
@@ -584,7 +604,6 @@ contract RoundContract {
         let levelIndex: Int = self.levelIndex;
         let tickSold: Int = self.ticketsWin * self.winningProbability;
         let remainingWinners: Int = self.ticketsWin;
-        //dump(remainingWinners);
         let currentWinners: Int = 0;
         let ticketPOKPrice: Int = amount / tickSold;
         let iteration: Int = 1;
@@ -609,7 +628,6 @@ contract RoundContract {
             remainingWinners -= currentWinners;
             levelIndex += 1;
             iteration += 1;
-            //dump(remainingWinners);
         }
     }
 

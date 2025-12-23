@@ -181,18 +181,6 @@ contract XPOK {
         throwUnless(ErrorUnauthorized, sender() == self.owner);
         let init: StateInit = initOf RoundContract(myAddress(), msg.roundId);
         sendMsgWithReserve(contractAddress(init), context().value, msg.toCell());
-        /*let id: Int = 1;
-        repeat (self.lastGameIndex) {
-            let roundIndex: Int = self.indexLoop * 1000 + id;
-            let init: StateInit = initOf RoundContract(myAddress(), roundIndex);
-            deploy(DeployParameters{
-                init: init,
-                body: "balance".asComment(),
-                mode: SendIgnoreErrors | SendPayFwdFeesSeparately,      // skip the message in case of errors
-                value: COMMISSION
-            });
-            id += 1;
-        }*/
     }
 
     receive(msg: ChangeLastGameIndex) {
@@ -234,14 +222,13 @@ contract XPOK {
     }
 
     receive(msg: BuyTickets) { 
-        //TODO: определить сколько можно купить билетов за раз
         let ctx: Context = context();
         try {
             throwUnless(ErrorLotteryNotStarted, self.isLotteryStarted == true);
             throwUnless(ErrorLastDayUnavailable, self.indexGame < self.lastGameIndex);
             throwUnless(ErrorNotEnoughTonsToBuyTicket, ctx.value >= TICKET_TON_PRICE + COMMISSION * 2);
             throwUnless(ErrorMaxTicketsReached, self.ticketsSold - self.ticketsSoldBefore < self.maxTickets);
-            let tickets: Int = (ctx.value - COMMISSION * 2) / TICKET_TON_PRICE;
+            let tickets: Int = (ctx.value - COMMISSION * 3) / TICKET_TON_PRICE;
             throwUnless(MaxTicketsCount, tickets < 251);
             let allTicketsPrice = tickets * TICKET_TON_PRICE;
             let winTickets: Int = self.checkWinTickets(tickets);
@@ -250,12 +237,21 @@ contract XPOK {
             nativeReserve(toLeaveOnBalance, ReserveAtMost);
             if(winTickets > 0) {
                 let index: Int = self.indexLoop * 1000 + self.indexGame;
-                deploy(DeployParameters{
-                    init: initOf StorageContract(myAddress(), sender()),
-                    body: Winners{indexGame: index, winTickets: tickets}.toCell(),
-                    mode: SendIgnoreErrors| SendRemainingBalance,
-                    value: 0
-                });           
+                if (msg.isNewUser) {
+                    deploy(DeployParameters{
+                        init: initOf StorageContract(myAddress(), sender()),
+                        body: Winners{indexGame: index, winTickets: winTickets}.toCell(),
+                        mode: SendIgnoreErrors| SendRemainingBalance,
+                        value: 0
+                    });                       
+                }else{
+                    message(MessageParameters{
+                        to: contractAddress(initOf StorageContract(myAddress(), sender())),
+                        value: 0,
+                        mode: SendIgnoreErrors | SendRemainingBalance,
+                        body: Winners{indexGame: index, winTickets: winTickets}.toCell(),
+                    });
+                }      
             }else{
                 cashback(sender());
             }
@@ -266,7 +262,6 @@ contract XPOK {
             errorComment.append("Something went wrong (");
             errorComment.append(error.toString());
             errorComment.append(")");
-            dump(errorComment.toString());
             self.notify(errorComment.toString().asComment());
         }
     }
@@ -305,6 +300,7 @@ contract XPOK {
                     self.tons += ctx.value - COMMISSION;
                     self.sendRoundContractGetWinMsg(msg.amount, self.additionalPrize);
                     self.indexGame += 1;
+                    self.deployRound();
                 } else if (msg.sender == self.marketMaker && self.indexGame == self.lastGameIndex) {
                     throwUnless(ErrorLotteryNotStarted, self.isLotteryStarted == true);
                     let royaltyProfit: Int = msg.amount / 10;
@@ -313,7 +309,9 @@ contract XPOK {
                     self.sendRoundContractGetWinMsg(self.pokBalance, msg.amount - royaltyProfit);
                     sendTon(msg.sender, self.tons, "Buying POK for TON");
                     self.tons = 0;
-                    self.lockEndDate = now() + TWO_DAYS;
+                    if(self.lockEndDate < now() + TWO_DAYS){
+                        self.lockEndDate = now() + TWO_DAYS;
+                    }
                     self.isLotteryStarted = false;
                     self.indexGame = 0;
                 } else {
@@ -352,6 +350,7 @@ contract XPOK {
 
     receive(msg: WTHPOKDebug) {
         throwUnless(ErrorUnauthorized, sender() == self.owner);
+        throwUnless(ErrorLockNotOver, now() > self.lockEndDate);
         let pokAmount: Int = msg.pokAmount != null ? msg.pokAmount!! : self.allPOKBalance;
         transferTokensTo(self.pokJettonWalletAddress, sender(), pokAmount, "Transfer all POKs");
         self.allPOKBalance = 0;
@@ -415,6 +414,20 @@ contract XPOK {
         }
         self.winTickets += winTickets;
         return winTickets;
+    }
+
+    inline fun deployRound(){
+        let roundIndex: Int = self.indexLoop * 1000 + self.indexGame;
+        let init: StateInit = initOf RoundContract(myAddress(), roundIndex);
+        deploy(DeployParameters{
+            init: init,
+            body: StartValues{
+                levelIndex: self.levelIndex,
+                winningProbability: self.winningProbability
+            }.toCell(),
+            mode: SendIgnoreErrors | SendPayFwdFeesSeparately,
+            value: COMMISSION
+        });
     }
 
     get fun balance(): Int {
