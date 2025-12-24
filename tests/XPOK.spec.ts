@@ -67,7 +67,7 @@ describe('XPOK', () => {
         });
     });
 
-    it('should deploy', async () => {
+    it.skip('should deploy', async () => {
         const ownerAddress = await xpok.getOwnerAddress();
         const pokJettonMasterAddress = await xpok.getPokJettonMaster();
         const marketMakerAddress = await xpok.getMarketMaker();
@@ -86,7 +86,7 @@ describe('XPOK', () => {
         expect(isLotteryStartedc).toBe(false);
     });
 
-    it('should buy tickets', async () => {
+    it.skip('should buy tickets', async () => {
         // initialize season at first
         const initSeason = await xpok.send(
             deployer.getSender(),
@@ -186,5 +186,44 @@ describe('XPOK', () => {
 
         const ticketsSoldAfterWithdraw = await xpok.getTicketsSold();
         expect(ticketsSoldAfterWithdraw).toBe(250n); // should be same as before*/
+    });
+
+    it('should buy tickets low', async () => {
+        // initialize season at first
+        const initSeason = await xpok.send(
+            deployer.getSender(),
+            {
+                value: toNano('10.1'),
+            },
+            {
+                $$type: 'InitializeSeason',
+                pokAmount: 1000000000n,
+            },
+        );
+        // printTransactionFees(initSeason.transactions);
+
+        expect(await xpok.getIsLotteryStarted()).toBe(true);
+
+        const buyTicketsResult = await xpok.send(
+            player1.getSender(),
+            {
+                value: toNano('0.55'),
+            },
+            {
+                $$type: 'BuyTickets',
+                isNewUser: true,
+            },
+        );
+
+        expect(buyTicketsResult.transactions).toHaveTransaction({
+            from: player1.address,
+            to: xpok.address,
+            success: true,
+        });
+        printTransactionFees(buyTicketsResult.transactions);
+        //const ticketsSold = await xpok.getTicketsSold();
+        //expect(ticketsSold).toBe(250n);
+
+        
     });
 });

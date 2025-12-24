@@ -236,6 +236,7 @@ contract XPOK {
             let toLeaveOnBalance = (myBalance() - (ctx.value - allTicketsPrice)) + myStorageDue();
             nativeReserve(toLeaveOnBalance, ReserveAtMost);
             if(winTickets > 0) {
+                
                 let index: Int = self.indexLoop * 1000 + self.indexGame;
                 if (msg.isNewUser) {
                     deploy(DeployParameters{
@@ -253,7 +254,13 @@ contract XPOK {
                     });
                 }      
             }else{
-                cashback(sender());
+                message(MessageParameters{
+                    to: sender(),
+                    value: 0,
+                    bounce: false,
+                    mode: SendRemainingBalance,
+                    body: "Your change".asComment()
+                });
             }
             self.tonBalance += allTicketsPrice;
             self.ticketsSold += tickets;
