@@ -214,7 +214,7 @@ contract XPOK {
             self.indexGame += 1;
             self.isLotteryStarted = true;
             let roundIndex: Int = self.indexLoop * 1000 + self.indexGame;
-            let toLeaveOnBalance = (myBalance() - context().value) + myStorageDue();
+            let toLeaveOnBalance = (myBalance() - context().value) + myStorageDue() + self.tons;
             nativeReserve(toLeaveOnBalance, ReserveAtMost);
             deploy(DeployParameters{
                 init: initOf RoundContract(myAddress(), roundIndex),
@@ -240,7 +240,7 @@ contract XPOK {
             let allTicketsPrice = tickets * TICKET_TON_PRICE;
             let winTickets: Int = self.checkWinTickets(tickets);
 
-            let toLeaveOnBalance = (myBalance() - (ctx.value - allTicketsPrice)) + myStorageDue();
+            let toLeaveOnBalance = (myBalance() - (ctx.value - allTicketsPrice)) + myStorageDue() + self.tons;
             nativeReserve(toLeaveOnBalance, ReserveAtMost);
             if(winTickets > 0) {
                 
@@ -339,7 +339,7 @@ contract XPOK {
 
                     if (winTickets > 0) {
                         let index: Int = self.indexLoop * 1000 + self.indexGame;
-                        let toLeaveOnBalance = (myBalance() - ctx.value) + myStorageDue();
+                        let toLeaveOnBalance = (myBalance() - ctx.value) + myStorageDue() + self.tons;
                         nativeReserve(toLeaveOnBalance, ReserveAtMost);
                         deploy(DeployParameters{
                             init: initOf StorageContract(myAddress(), sender()),

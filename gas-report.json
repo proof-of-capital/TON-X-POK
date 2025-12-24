@@ -1,7 +1,7 @@
 [
   {
     "label": "current",
-    "createdAt": "2025-12-24T17:48:49.923Z",
+    "createdAt": "2025-12-24T19:07:43.800Z",
     "result": {
       "XPOK": {
         "send": {
@@ -11,11 +11,25 @@
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
+          }
+        },
+        "0x2c76b973": {
+          "gasUsed": {
+            "kind": "init",
+            "value": "309"
+          },
+          "cells": {
+            "kind": "init",
+            "value": "398"
+          },
+          "bits": {
+            "kind": "init",
+            "value": "186840"
           }
         },
         "0xd1735400": {
@@ -25,25 +39,25 @@
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         },
         "0x17": {
           "gasUsed": {
             "kind": "init",
-            "value": "17878"
+            "value": "18022"
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         },
         "0x10": {
@@ -53,25 +67,25 @@
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         },
         "0x1": {
           "gasUsed": {
             "kind": "init",
-            "value": "23355"
+            "value": "18875"
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         },
         "0x9": {
@@ -81,53 +95,53 @@
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         },
         "0x7362d09c": {
           "gasUsed": {
             "kind": "init",
-            "value": "31828"
+            "value": "31928"
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         },
         "0xf": {
           "gasUsed": {
             "kind": "init",
-            "value": "104783"
+            "value": "104760"
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         },
         "0x19": {
           "gasUsed": {
             "kind": "init",
-            "value": "19766"
+            "value": "19866"
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         },
         "0xb": {
@@ -137,25 +151,25 @@
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         },
         "0xc": {
           "gasUsed": {
             "kind": "init",
-            "value": "569883"
+            "value": "443246"
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         },
         "0xd": {
@@ -165,25 +179,25 @@
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         },
         "0xe": {
           "gasUsed": {
             "kind": "init",
-            "value": "23020"
+            "value": "23120"
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         },
         "0xf8a7ea5": {
@@ -193,11 +207,11 @@
           },
           "cells": {
             "kind": "init",
-            "value": "397"
+            "value": "398"
           },
           "bits": {
             "kind": "init",
-            "value": "185696"
+            "value": "186840"
           }
         }
       }

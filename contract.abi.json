@@ -2,6 +2,7 @@
   "0xb3588d5314b7fb2c8fc1cac3fb4bc0a22bdfc102fc7ac8c9cae0a9db8467856c": "XPOK",
   "0x346360e282bbb2cd378ee6a0990c96d856d819b9b58e36a3af89136dd18403b3": "XPOK",
   "0xefefd0d403d0f0b4727d9b4bf2239123f2e7d8e2e140351cd61338b94d1774a5": "XPOK",
+  "0xd9a3ade40f0270861dc29ba93e7130fc391d51c3425f161a1051ce71e33841c4": "XPOK",
   "XPOK": {
     "receivers": [
       {
@@ -101,6 +102,13 @@
           "kind": "typed",
           "type": "0xf8a7ea5"
         }
+      },
+      {
+        "receiver": "internal",
+        "message": {
+          "kind": "typed",
+          "type": "0x2c76b973"
+        }
       }
     ],
     "types": [
@@ -159,6 +167,10 @@
       {
         "name": "0xf8a7ea5",
         "header": 260734629
+      },
+      {
+        "name": "0x2c76b973",
+        "header": 745978227
       }
     ],
     "name": "XPOK"
