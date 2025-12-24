@@ -823,17 +823,6 @@
     jssha "3.2.0"
     tweetnacl "1.0.3"
 
-"@ton/sandbox@>=0.37.0":
-  version "0.41.0"
-  resolved "https://registry.yarnpkg.com/@ton/sandbox/-/sandbox-0.41.0.tgz#a0c81cca5dedb1891e1cf3f621f730f6bac63539"
-  integrity sha512-+WRWiHfm62xQebVt6BvLb2UhVphpBHCwSby8R5vP9llzdVck+XEs+p4csIkZBh6gRQsy1Xomzh1PpgZS5XVE3A==
-  dependencies:
-    "@vscode/debugadapter" "^1.68.0"
-    chalk "^4.1.2"
-    fflate "^0.8.2"
-    table "^6.9.0"
-    ton-assembly "0.6.1"
-
 "@ton/sandbox@^0.32.2":
   version "0.32.2"
   resolved "https://registry.yarnpkg.com/@ton/sandbox/-/sandbox-0.32.2.tgz#e949d1df2ae98c1552901597200209163dd8cc42"
@@ -841,6 +830,17 @@
   dependencies:
     chalk "^4.1.2"
     table "^6.9.0"
+
+"@ton/sandbox@^0.40.0":
+  version "0.40.0"
+  resolved "https://registry.npmjs.org/@ton/sandbox/-/sandbox-0.40.0.tgz#d414bcbf5015417c57fa0619501b3f752a235502"
+  integrity sha512-j0+9uqdxYrMb89O8GKWHqX0Yz0FZXrbDZOdgIO0cUgVgydMT7kIn7EOM8KGy6h+bD1Vk9kcpGqfhX1e4isQYTQ==
+  dependencies:
+    "@vscode/debugadapter" "^1.68.0"
+    chalk "^4.1.2"
+    fflate "^0.8.2"
+    table "^6.9.0"
+    ton-assembly "0.6.1"
 
 "@ton/test-utils@>=0.11.0":
   version "0.12.0"
@@ -900,7 +900,7 @@
 
 "@tonstudio/parser-runtime@0.0.1", "@tonstudio/parser-runtime@^0.0.1":
   version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@tonstudio/parser-runtime/-/parser-runtime-0.0.1.tgz#469955fb7ea354d4fadaa5964359b11fd17f926b"
+  resolved "https://registry.npmjs.org/@tonstudio/parser-runtime/-/parser-runtime-0.0.1.tgz#469955fb7ea354d4fadaa5964359b11fd17f926b"
   integrity sha512-5s4fLkXWxa4SAd7QGGvJXe13GakEo0J3VF5dUI/i3A//bGZxMwCp1FcnbErpNs3y0LcAZoXE5FCUnDowDQptqw==
 
 "@tsconfig/node10@^1.0.7":
@@ -1142,14 +1142,14 @@
 
 "@vscode/debugadapter@^1.68.0":
   version "1.68.0"
-  resolved "https://registry.yarnpkg.com/@vscode/debugadapter/-/debugadapter-1.68.0.tgz#abb23463cb750ca4a6f0834c5d4db659258dc159"
+  resolved "https://registry.npmjs.org/@vscode/debugadapter/-/debugadapter-1.68.0.tgz#abb23463cb750ca4a6f0834c5d4db659258dc159"
   integrity sha512-D6gk5Fw2y4FV8oYmltoXpj+VAZexxJFopN/mcZ6YcgzQE9dgq2L45Aj3GLxScJOD6GeLILcxJIaA8l3v11esGg==
   dependencies:
     "@vscode/debugprotocol" "1.68.0"
 
 "@vscode/debugprotocol@1.68.0":
   version "1.68.0"
-  resolved "https://registry.yarnpkg.com/@vscode/debugprotocol/-/debugprotocol-1.68.0.tgz#e558ba6affe1be7aff4ec824599f316b61d9a69d"
+  resolved "https://registry.npmjs.org/@vscode/debugprotocol/-/debugprotocol-1.68.0.tgz#e558ba6affe1be7aff4ec824599f316b61d9a69d"
   integrity sha512-2J27dysaXmvnfuhFGhfeuxfHRXunqNPxtBoR3koiTOA9rdxWNDTa1zIFLCFMSHJ9MPTPKFcBeblsyaCJCIlQxg==
 
 acorn-walk@^8.1.1:
@@ -1452,7 +1452,7 @@ buffer@^6.0.3:
 
 cac@^6.7.14:
   version "6.7.14"
-  resolved "https://registry.yarnpkg.com/cac/-/cac-6.7.14.tgz#804e1e6f506ee363cb0e3ccbb09cad5dd9870959"
+  resolved "https://registry.npmjs.org/cac/-/cac-6.7.14.tgz#804e1e6f506ee363cb0e3ccbb09cad5dd9870959"
   integrity sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==
 
 call-bind-apply-helpers@^1.0.1, call-bind-apply-helpers@^1.0.2:
@@ -3361,7 +3361,7 @@ to-regex-range@^5.0.1:
 
 ton-assembly@0.6.1:
   version "0.6.1"
-  resolved "https://registry.yarnpkg.com/ton-assembly/-/ton-assembly-0.6.1.tgz#ad8c48e317b4dcc71903d17515275ecf9fcdb8a6"
+  resolved "https://registry.npmjs.org/ton-assembly/-/ton-assembly-0.6.1.tgz#ad8c48e317b4dcc71903d17515275ecf9fcdb8a6"
   integrity sha512-HZNDD2Cy8DQ9UY+8eCgCFY9RBnHEA+Abxo6chDtZQqsX1xo97UZzhMWzK+bYoe1w9gsGugi+1kOH7cpjzDN6jQ==
   dependencies:
     "@tonstudio/parser-runtime" "^0.0.1"
@@ -3382,7 +3382,7 @@ ton-lite-client@^3.1.1:
 
 ton-source-map@^0.2.2:
   version "0.2.2"
-  resolved "https://registry.yarnpkg.com/ton-source-map/-/ton-source-map-0.2.2.tgz#a7b647a085d23a05172b26c110d7197ab4446f9a"
+  resolved "https://registry.npmjs.org/ton-source-map/-/ton-source-map-0.2.2.tgz#a7b647a085d23a05172b26c110d7197ab4446f9a"
   integrity sha512-T9as2Cmv5aqFbELd0ZxIyY3NRPGxf3ltpVN8rm+uIXMMDlNaGW3Wf6jFcaJYwkRNB2eR52PhNbt5tI5lwgL1Cg==
 
 ton-tl@^1.0.1:

@@ -16,8 +16,8 @@ export async function run(provider: NetworkProvider) {
             value: toNano('0.05'), 
         },
         {
-            $$type: 'StopLottery',
-            stopFlag: false
+            $$type: 'StartStopLottery',
+            isLotteryStarted: false
         }
     );
 }
