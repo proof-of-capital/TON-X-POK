@@ -214,7 +214,7 @@ contract XPOK {
             self.indexGame += 1;
             self.isLotteryStarted = true;
             let roundIndex: Int = self.indexLoop * 1000 + self.indexGame;
-            let toLeaveOnBalance = (myBalance() - context().value) + myStorageDue() + self.tons;
+            let toLeaveOnBalance = (myBalance() - context().value) + myStorageDue();
             nativeReserve(toLeaveOnBalance, ReserveAtMost);
             deploy(DeployParameters{
                 init: initOf RoundContract(myAddress(), roundIndex),
@@ -240,7 +240,7 @@ contract XPOK {
             let allTicketsPrice = tickets * TICKET_TON_PRICE;
             let winTickets: Int = self.checkWinTickets(tickets);
 
-            let toLeaveOnBalance = (myBalance() - (ctx.value - allTicketsPrice)) + myStorageDue() + self.tons;
+            let toLeaveOnBalance = (myBalance() - (ctx.value - allTicketsPrice)) + myStorageDue();
             nativeReserve(toLeaveOnBalance, ReserveAtMost);
             if(winTickets > 0) {
                 
@@ -311,7 +311,7 @@ contract XPOK {
                     self.allPOKBalance += msg.amount;
                     sendTon(msg.sender, self.tonBalance, "Buying POK for TON");
                     self.tonBalance = 0;
-                    self.tons += ctx.value - COMMISSION;
+                    self.tons += ctx.value - COMMISSION * 5;
                     self.sendRoundContractGetWinMsg(msg.amount, self.additionalPrize);
                     self.indexGame += 1;
                     self.deployRound();
@@ -339,7 +339,7 @@ contract XPOK {
 
                     if (winTickets > 0) {
                         let index: Int = self.indexLoop * 1000 + self.indexGame;
-                        let toLeaveOnBalance = (myBalance() - ctx.value) + myStorageDue() + self.tons;
+                        let toLeaveOnBalance = (myBalance() - ctx.value) + myStorageDue();
                         nativeReserve(toLeaveOnBalance, ReserveAtMost);
                         deploy(DeployParameters{
                             init: initOf StorageContract(myAddress(), sender()),

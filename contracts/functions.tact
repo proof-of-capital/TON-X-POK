@@ -14,17 +14,16 @@ fun sendTon(to: Address, value: Int, comment: String) {
     });
 }
 
-    fun transferTokensTo(toAddress: Address, recipient: Address, amount: Int, comment: String) {
-
-        let textComment: StringBuilder = beginString();
+fun transferTokensTo(toAddress: Address, recipient: Address, amount: Int, comment: String) {
+    let textComment: StringBuilder = beginString();
         textComment.append(comment);
 
-        let forwardPayload: Cell = beginCell()
+    let forwardPayload: Cell = beginCell()
         .storeUint(0, 32)
         .storeRef(textComment.toCell())
         .endCell();
 
-        message(MessageParameters{
+    message(MessageParameters{
             to: toAddress,
             value: COMMISSION,
             body: JettonTransfer{
@@ -36,8 +35,8 @@ fun sendTon(to: Address, value: Int, comment: String) {
                 forwardTonAmount: 1,
                 forwardPayload: forwardPayload
             }.toCell(),
-        });
-    }
+    });
+}
 
 inline fun sendComment(recipient: Address, comment: String) {
     message(MessageParameters{
