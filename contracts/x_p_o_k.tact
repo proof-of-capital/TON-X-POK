@@ -284,7 +284,6 @@ contract XPOK {
         //отправляется юзером для получения выигрыша
         try {
             throwUnless(ErrorNotEnoughTons, context().value >= COMMISSION * 3);
-            throwUnless(ErrorFirstRoundNotOver, self.indexGame > 1);
             let init: StateInit = initOf StorageContract(myAddress(), sender());
             sendMsgWithReserve(contractAddress(init), context().value, GetFullWin{}.toCell());
         } catch (_) {

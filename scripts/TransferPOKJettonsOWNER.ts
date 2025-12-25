@@ -8,12 +8,12 @@ export async function run(provider: NetworkProvider) {
     const sender = Address.parse("UQBWOZUkRmnEf19c7KKwgY4q7FVjqTtOA19_1-97IiuU1Y_4");
     const comment = 'Transfer main jetton from owner';
     
-    const body = beginCell().storeUint(0xf8a7ea5, 32).storeInt(1735144534, 64).storeCoins(toNano('100')).storeAddress(contractAddress).storeAddress(sender).storeBit(0).storeCoins(toNano('0.25')).storeBit(1).storeRef(beginCell().storeUint(0x00000000, 32).storeStringTail(comment).endCell()).endCell();
+    const body = beginCell().storeUint(0xf8a7ea5, 32).storeInt(1735144534, 64).storeCoins(toNano('1000')).storeAddress(contractAddress).storeAddress(sender).storeBit(0).storeCoins(toNano('0.5')).storeBit(1).storeRef(beginCell().storeUint(0x00000000, 32).storeStringTail(comment).endCell()).endCell();
 
 
     await provider.sender().send({
         to: jettonWalletAddress,
-        value: toNano('0.3'),
+        value: toNano('0.55'),
         bounce: true,
         body: body,
     });

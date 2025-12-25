@@ -1,1 +1,1 @@
-export const CONTRACTADDRESS = 'EQBnSayGFTh9OwBXCBTmpsVK5VFRjnFPTCuaHd6Mwp_6iaR2'
+export const CONTRACTADDRESS = 'EQBErbkQw93lBcsQ_ank6V064npjftIZ3eyO2r9_yK4S7q_a'
