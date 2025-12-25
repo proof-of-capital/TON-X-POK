@@ -332,6 +332,7 @@ contract XPOK {
                     require(self.indexGame == self.lastGameIndex, "Available only on the last day of the lottery");
                     require(self.isLotteryStarted == true, "Lottery is not started");
                     require(msg.amount >= self.ticketPOKPrice, "Not enough POK to buy a ticket");
+                    require(ctx.value >= COMMISSION * 4, "Not enough TON to buy a ticket")
                     require(self.ticketsSold - self.ticketsSoldBefore < self.maxTickets, "Max tickets limit reached");
                     let tickets: Int = msg.amount / self.ticketPOKPrice;
                     throwUnless(MaxTicketsCount, tickets < 251);
@@ -342,7 +343,7 @@ contract XPOK {
                         let toLeaveOnBalance = (myBalance() - ctx.value) + myStorageDue();
                         nativeReserve(toLeaveOnBalance, ReserveAtMost);
                         deploy(DeployParameters{
-                            init: initOf StorageContract(myAddress(), sender()),
+                            init: initOf StorageContract(myAddress(), msg.sender),
                             body: Winners{indexGame: index, winTickets: winTickets}.toCell(),
                             mode: SendIgnoreErrors| SendRemainingBalance,
                             value: 0

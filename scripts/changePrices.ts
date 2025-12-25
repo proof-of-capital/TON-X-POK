@@ -14,11 +14,11 @@ export async function run(provider: NetworkProvider) {
     await superContract.send(
         provider.sender(),
         {
-            value: toNano('0.01'), 
+            value: toNano('0.05'), 
         },
         {
             $$type: 'ChangePrice',
-            newticketPOKPrice: 2000n
+            newticketPOKPrice: 10n
         }
     );
 }

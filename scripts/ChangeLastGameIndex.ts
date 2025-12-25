@@ -14,11 +14,11 @@ export async function run(provider: NetworkProvider) {
     await superContract.send(
         provider.sender(),
         {
-            value: toNano('0.05'), 
+            value: toNano('0.02'), 
         },
         {
-            $$type: 'ChangeMarketMaker',
-            newMarketMakerAddress: Address.parse('UQAIzXA4iuqWwozllUQ1-fD_UIaCsdxhIkN5vDMza6KX2yZy'),
+            $$type: 'ChangeLastGameIndex',
+            newLastGameIndex: 3n,
         }
     );
 }

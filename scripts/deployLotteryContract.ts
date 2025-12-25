@@ -3,7 +3,7 @@ import { NetworkProvider } from '@ton/blueprint';
 import { XPOK } from '../build/XPOK/XPOK_XPOK';
 
 export async function run(provider: NetworkProvider) {
-    const owner = Address.parse('UQC6l0ZX3YjD7ux6tdHAkZGVmI1OBszhBBNcCWAaRkdoYC1x');
+    const owner = Address.parse('UQBWOZUkRmnEf19c7KKwgY4q7FVjqTtOA19_1-97IiuU1Y_4');
     const pokJettonMasterAddress = Address.parse('EQBp6FAkDdHD_lLKUBI-J-Et5zQeyJlixc6f3iKHBie85Fd-');
     const MarketMakerAddress = Address.parse('UQBWOZUkRmnEf19c7KKwgY4q7FVjqTtOA19_1-97IiuU1Y_4');
     const RoyaltyWalletAddress = Address.parse('UQAP3YoWUpwXIZBCMPExVtwVLEazA37etHFkuspUMCMIOTjl');
@@ -30,7 +30,7 @@ export async function run(provider: NetworkProvider) {
     await xpok.send(
         provider.sender(),
         {
-            value: toNano('0.05'),
+            value: toNano('0.1'),
         },
         null,
     );
