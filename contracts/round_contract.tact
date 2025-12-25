@@ -637,7 +637,7 @@ contract RoundContract {
         }
         let prize: Int = self.addPrize;
         let remainingPrize: Int = prize;
-        let price: Int = self.prizeFund / (self.ticketsWin * self.winningProbability);
+        let price: Int = self.addPrize / (self.ticketsWin * self.winningProbability);
 
         while (remainingPrize / 3 > price) {                             
             prize = (remainingPrize * 2) / 3;
