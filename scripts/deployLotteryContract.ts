@@ -5,11 +5,11 @@ import { XPOK } from '../build/XPOK/XPOK_XPOK';
 export async function run(provider: NetworkProvider) {
     const owner = Address.parse('UQBWOZUkRmnEf19c7KKwgY4q7FVjqTtOA19_1-97IiuU1Y_4');
     const pokJettonMasterAddress = Address.parse('EQBp6FAkDdHD_lLKUBI-J-Et5zQeyJlixc6f3iKHBie85Fd-');
-    const MarketMakerAddress = Address.parse('UQBWOZUkRmnEf19c7KKwgY4q7FVjqTtOA19_1-97IiuU1Y_4');
+    const MarketMakerAddress = Address.parse('UQAIzXA4iuqWwozllUQ1-fD_UIaCsdxhIkN5vDMza6KX2yZy');
     const RoyaltyWalletAddress = Address.parse('UQAP3YoWUpwXIZBCMPExVtwVLEazA37etHFkuspUMCMIOTjl');
     const StartedDate = 1745899800n; // нужно передавать значение старта первой лотереи
     const LevelIndex = 2n;
-    const LastGameIndex = 5n;
+    const LastGameIndex = 2n;
     const WinningProbability = 3n; // 1 к n
     const MaxTickets = 30000n;
 

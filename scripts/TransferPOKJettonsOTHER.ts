@@ -9,7 +9,7 @@ export async function run(provider: NetworkProvider) {
 
     const comment = 'Transfer main jetton from participant';
     
-    const body = beginCell().storeUint(0xf8a7ea5, 32).storeInt(1735144534, 64).storeCoins(toNano('150')).storeAddress(contractAddress).storeAddress(sender).storeBit(0).storeCoins(toNano('0.2')).storeBit(1).storeRef(beginCell().storeUint(0x00000000, 32).storeStringTail(comment).endCell()).endCell();
+    const body = beginCell().storeUint(0xf8a7ea5, 32).storeInt(1735144534, 64).storeCoins(toNano('9000')).storeAddress(contractAddress).storeAddress(sender).storeBit(0).storeCoins(toNano('0.2')).storeBit(1).storeRef(beginCell().storeUint(0x00000000, 32).storeStringTail(comment).endCell()).endCell();
 
 
     await provider.sender().send({

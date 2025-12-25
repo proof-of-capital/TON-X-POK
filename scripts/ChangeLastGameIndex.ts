@@ -18,7 +18,7 @@ export async function run(provider: NetworkProvider) {
         },
         {
             $$type: 'ChangeLastGameIndex',
-            newLastGameIndex: 4n,
+            newLastGameIndex: 2n,
         }
     );
 }
