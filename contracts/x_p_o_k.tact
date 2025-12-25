@@ -133,6 +133,7 @@ contract XPOK {
     receive(msg: ChangePrice) { 
         throwUnless(ErrorUnauthorized, sender() == self.owner);
         throwUnless(ErrorInvalidTicketPrice, msg.newticketPOKPrice != 0);
+        throwUnless(ErrorLastDayUnavailable, self.indexGame < self.lastGameIndex);
         if (msg.newticketPOKPrice != 0) {
             self.ticketPOKPrice = msg.newticketPOKPrice * NANO_COINS_VALUES;
         }
@@ -283,7 +284,7 @@ contract XPOK {
     receive(msg: Win) {
         //отправляется юзером для получения выигрыша
         try {
-            throwUnless(ErrorNotEnoughTons, context().value >= COMMISSION * 3);
+            throwUnless(ErrorNotEnoughTons, context().value >= COMMISSION * 4);
             let init: StateInit = initOf StorageContract(myAddress(), sender());
             sendMsgWithReserve(contractAddress(init), context().value, GetFullWin{}.toCell());
         } catch (_) {
