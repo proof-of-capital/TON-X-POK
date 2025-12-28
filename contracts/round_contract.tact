@@ -241,16 +241,16 @@ contract RoundContract {
     inline fun checkWin(tickets: Int): Int {
         let amount: Int = 0;
         if (self.allWinners > 0) {
+            if(self.addPrize > 1) {
+                let checkAddWin: Int = tickets + self.totalTickets;                
+                amount += self.checkAddWin(checkAddWin);
+            }
             while (tickets > 0) {
                 let winner: Int = random(1, self.allWinners + 1);
                 amount += self.foundLevel(winner);
                 self.totalTickets += 1;
                 tickets -= 1;
                 self.ticketsWin -= 1;                
-            }
-            if(self.addPrize > 1) {
-                let checkAddWin: Int = tickets + self.totalTickets;                
-                amount += self.checkAddWin(checkAddWin);
             }
         }
         return amount;
@@ -638,7 +638,7 @@ contract RoundContract {
         }
         let prize: Int = self.addPrize;
         let remainingPrize: Int = prize;
-        let price: Int = self.prizeFund / (self.ticketsWin * self.winningProbability);
+        let price: Int = self.addPrize / (self.ticketsWin * self.winningProbability);
 
         while (remainingPrize / 3 > price) {                             
             prize = (remainingPrize * 2) / 3;

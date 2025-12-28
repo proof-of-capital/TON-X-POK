@@ -3,7 +3,6 @@ import { XPOK } from '../build/XPOK/XPOK_XPOK';
 import { NetworkProvider } from '@ton/blueprint';
 import { CONTRACTADDRESS } from './!YOURCONTRACTADDRESS';
 
-
 export async function run(provider: NetworkProvider) {
     const contractAddress = Address.parse(CONTRACTADDRESS); 
     
@@ -14,11 +13,11 @@ export async function run(provider: NetworkProvider) {
     await superContract.send(
         provider.sender(),
         {
-            value: toNano('0.05'), 
+            value: toNano('0.95'), 
         },
         {
-            $$type: 'ChangeMarketMaker',
-            newMarketMakerAddress: Address.parse('UQAIzXA4iuqWwozllUQ1-fD_UIaCsdxhIkN5vDMza6KX2yZy'),
+            $$type: 'BuyTickets',
+            isNewUser: true,
         }
     );
 }

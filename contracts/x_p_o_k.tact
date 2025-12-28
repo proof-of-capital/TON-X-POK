@@ -133,6 +133,7 @@ contract XPOK {
     receive(msg: ChangePrice) { 
         throwUnless(ErrorUnauthorized, sender() == self.owner);
         throwUnless(ErrorInvalidTicketPrice, msg.newticketPOKPrice != 0);
+        throwUnless(ErrorLastDayUnavailable, self.indexGame < self.lastGameIndex);
         if (msg.newticketPOKPrice != 0) {
             self.ticketPOKPrice = msg.newticketPOKPrice * NANO_COINS_VALUES;
         }
@@ -283,8 +284,7 @@ contract XPOK {
     receive(msg: Win) {
         //отправляется юзером для получения выигрыша
         try {
-            throwUnless(ErrorNotEnoughTons, context().value >= COMMISSION * 3);
-            throwUnless(ErrorFirstRoundNotOver, self.indexGame > 1);
+            throwUnless(ErrorNotEnoughTons, context().value >= COMMISSION * 4);
             let init: StateInit = initOf StorageContract(myAddress(), sender());
             let roundId: Int = self.indexLoop * 1000 + self.indexGame;
             sendMsgWithReserve(contractAddress(init), context().value, GetFullWin{roundId:roundId}.toCell());
@@ -333,6 +333,7 @@ contract XPOK {
                     require(self.indexGame == self.lastGameIndex, "Available only on the last day of the lottery");
                     require(self.isLotteryStarted == true, "Lottery is not started");
                     require(msg.amount >= self.ticketPOKPrice, "Not enough POK to buy a ticket");
+                    require(ctx.value >= COMMISSION * 4, "Not enough TON to buy a ticket");
                     require(self.ticketsSold - self.ticketsSoldBefore < self.maxTickets, "Max tickets limit reached");
                     let tickets: Int = msg.amount / self.ticketPOKPrice;
                     throwUnless(MaxTicketsCount, tickets < 251);
@@ -343,7 +344,7 @@ contract XPOK {
                         let toLeaveOnBalance = (myBalance() - ctx.value) + myStorageDue();
                         nativeReserve(toLeaveOnBalance, ReserveAtMost);
                         deploy(DeployParameters{
-                            init: initOf StorageContract(myAddress(), sender()),
+                            init: initOf StorageContract(myAddress(), msg.sender),
                             body: Winners{indexGame: index, winTickets: winTickets}.toCell(),
                             mode: SendIgnoreErrors| SendRemainingBalance,
                             value: 0
