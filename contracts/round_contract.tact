@@ -164,7 +164,8 @@ contract RoundContract {
             body: SendWinForFull {
                 amount: self.checkWin(msg.tickets),
                 index: self.indexGame,
-                tickets: msg.tickets
+                tickets: msg.tickets,
+                roundId: msg.ongoingRoundId
             }.toCell(),
         });
     }

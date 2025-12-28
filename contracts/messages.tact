@@ -63,17 +63,21 @@ message(0xa) SendWinPerRound {
     participant: Address;
 }
 
-message(0xb) GetFullWin {}
+message(0xb) GetFullWin {
+    roundId: Int as uint16;
+}
 
 message(0xc) TicketsForFullWin {
     participant: Address;
     tickets: Int as uint16;
+    ongoingRoundId: Int as uint16;
 }
 
 message(0xd) SendWinForFull {
     amount: Int as coins;
     index: Int as uint16;
     tickets: Int as uint16;
+    roundId: Int as uint16;
 }
 
 message(0xe) FullWin {

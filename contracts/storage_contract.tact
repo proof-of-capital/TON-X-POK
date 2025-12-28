@@ -78,7 +78,7 @@ contract StorageContract {
             throwUnless(401, sender() == self.xpok);
             throwUnless(555, self.lock + 300 < now());
             require(self.winTickets != emptyMap(), "You have no tickets");
-            let firstAvailableRoundInfo: RoundTicketInfo?  = self.getFirstAvailableRoundInfo();
+            let firstAvailableRoundInfo: RoundTicketInfo?  = self.getFirstAvailableRoundInfo(msg.roundId);
             let ticketsToClaim = min(firstAvailableRoundInfo!!.ticketsCount, TICKETS_PER_TRANSACTION);
             let commission: Int = calculateCommission(ticketsToClaim);
             require(context().value >= commission + COMMISSION, "Not enough TONs to cover commission");
@@ -91,6 +91,7 @@ contract StorageContract {
                     body: TicketsForFullWin {
                         participant:self.participant,
                         tickets: ticketsToClaim,
+                        ongoingRoundId: msg.roundId
                     }.toCell(),
                     mode: SendRemainingBalance,
                 });
@@ -124,7 +125,7 @@ contract StorageContract {
         }
         self.lock = 0; // сбрасываем блокировку после получения выигрыша
         // смотрим есть ли еще раунды с билетами
-        let firstAvailableRoundInfo: RoundTicketInfo?  = self.getFirstAvailableRoundInfo();
+        let firstAvailableRoundInfo: RoundTicketInfo?  = self.getFirstAvailableRoundInfo(msg.roundId);
         if (firstAvailableRoundInfo != null) { // если такой раунд нашёлся
             // отправляем запрос на получение выигрыша за следующий раунд
             // берём либо сколько осталось, либо максимум за раз
@@ -139,6 +140,7 @@ contract StorageContract {
                     body: TicketsForFullWin {
                         participant:self.participant,
                         tickets: ticketsToClaim,
+                        ongoingRoundId: msg.roundId
                     }.toCell(),
                     mode: SendRemainingBalance,
                 });
@@ -165,8 +167,11 @@ contract StorageContract {
         }  
     }
 
-    fun getFirstAvailableRoundInfo(): RoundTicketInfo? {
+    fun getFirstAvailableRoundInfo(currentRoundId: Int): RoundTicketInfo? {
         foreach (roundId, ticketsCount in self.winTickets) {
+            if (roundId == currentRoundId) {
+                return null; // если раунд совпал с текущим, значит этот раунд ещё не закончился
+            }
             if (ticketsCount > 0) {
                 return RoundTicketInfo{
                     roundId: roundId,
