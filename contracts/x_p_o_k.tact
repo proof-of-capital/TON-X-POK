@@ -101,14 +101,39 @@ contract XPOK {
 
 
         message(MessageParameters{ 
-            to: self.pokJettonMasterAddress,
+            to: self.pocContract,
             value: 0,
             mode: SendRemainingValue,
-            body: ProvideWalletAddress{query_id: now(), owner_address: myAddress(), include_address: false}.toCell()
+            body: FetchXPOKRequest{}.toCell()
         });
     }
 
     receive(){}
+
+    receive(msg: FetchXPOKRequest) {
+        require(context().value > self.fee, "Not enought fee");
+        message(MessageParameters{ 
+            to: self.pocContract,
+            value: 0,
+            mode: SendRemainingValue,
+            body: FetchXPOKRequest{}.toCell()
+        });
+    }
+
+    receive(msg: FetchXPOKResponse) {
+        require(sender() == self.pocContract, "Unauthorized");
+        require(msg.isTonCollateral, "Collateral is not TON");
+        self.fee = msg.fee;
+        self.roundCapacity = msg.capacityInCollateral;
+        self.lockDate = min(min(msg.lockEndTime, msg.launchDeferredWithdrawalDate), msg.collateralDeferredWithdrawDate);
+
+        message(MessageParameters{ 
+            to: self.pokJettonMasterAddress,
+            value: 0,
+            mode: SendRemainingValue,
+            body: ProvideWalletAddress{query_id: now(), owner_address: myAddress(), include_address: false}.toCell()
+        });      
+    }
 
     receive(msg: TakeWalletAddress) { 
         require(self.pokJettonWalletAddress != newAddress(0, 0), "Contract POK jetton wallet id cannot be zero"); 
@@ -133,7 +158,7 @@ contract XPOK {
         require(self.additionalJettonWalletAddress != newAddress(0, 0), "Additional jetton wallet address cannot be zero");
         self.additionalJettonMasterAddress = msg.newAdditionalJettonMasterAddress;
         self.additionalJettonWalletAddress = msg.newAdditionalJettonWalletAddress;
-        transferTokensTo(self.additionalJettonWalletAddress, sender(), msg.amount, "Send other jettons to owner");
+        transferTokensTo(self.additionalJettonWalletAddress, sender(), msg.amount, "Send other jettons to owner", self.fee);
     }
 
     receive(msg: ChangePrice) { 
@@ -226,9 +251,9 @@ contract XPOK {
         try {
             throwUnless(ErrorLotteryNotStarted, self.isLotteryStarted == true);
             throwUnless(ErrorLastDayUnavailable, self.indexGame < self.lastGameIndex);
-            throwUnless(ErrorNotEnoughTonsToBuyTicket, ctx.value >= TICKET_TON_PRICE + COMMISSION * 2);
+            throwUnless(ErrorNotEnoughTonsToBuyTicket, ctx.value >= TICKET_TON_PRICE + self.fee * 3);
             throwUnless(ErrorMaxTicketsReached, self.ticketsSold - self.ticketsSoldBefore < self.maxTickets);
-            let tickets: Int = (ctx.value - COMMISSION * 3) / TICKET_TON_PRICE;
+            let tickets: Int = (ctx.value - self.fee * 3) / TICKET_TON_PRICE;
             throwUnless(MaxTicketsCount, tickets < 251);
             let allTicketsPrice = tickets * TICKET_TON_PRICE;
             let winTickets: Int = self.checkWinTickets(tickets);
@@ -276,7 +301,7 @@ contract XPOK {
     receive(msg: Win) {
         // sent by user to claim the full win
         try {
-            throwUnless(ErrorNotEnoughTons, context().value >= COMMISSION * 4);
+            throwUnless(ErrorNotEnoughTons, context().value >= self.fee * 4);
             let init: StateInit = initOf StorageContract(myAddress(), sender());
             let roundId: Int = self.indexLoop * 1000 + self.indexGame;
             sendMsgWithReserve(contractAddress(init), context().value, GetFullWin{roundId:roundId}.toCell());
@@ -286,7 +311,7 @@ contract XPOK {
     }
 
     receive(msg: GetWin) {
-        throwUnless(ErrorNotEnoughTons, context().value >= COMMISSION);
+        throwUnless(ErrorNotEnoughTons, context().value >= self.fee);
         let init: StateInit = initOf StorageContract(myAddress(), sender());
         sendMsgWithReserve(contractAddress(init), context().value, msg.toCell());
     }
@@ -304,14 +329,14 @@ contract XPOK {
                     self.allPOKBalance += msg.amount;
                     sendTon(msg.sender, self.tonBalance, "Buying POK for TON");
                     self.tonBalance = 0;
-                    self.tons += ctx.value - COMMISSION * 5;
+                    self.tons += ctx.value - self.fee * 5;
                     self.sendRoundContractGetWinMsg(msg.amount, self.additionalPrize);
                     self.indexGame += 1;
                     self.deployRound();
                 } else if (msg.sender == self.pocContract && self.indexGame == self.lastGameIndex) {
                     throwUnless(ErrorLotteryNotStarted, self.isLotteryStarted == true);
                     let royaltyProfit: Int = msg.amount / 10;
-                    transferTokensTo(self.pokJettonWalletAddress, self.royaltyWallet, royaltyProfit, "Royalty profit");
+                    transferTokensTo(self.pokJettonWalletAddress, self.royaltyWallet, royaltyProfit, "Royalty profit", self.fee);
                     self.allPOKBalance += msg.amount - royaltyProfit;
                     self.sendRoundContractGetWinMsg(self.pokBalance, msg.amount - royaltyProfit);
                     sendTon(msg.sender, self.tons, "Buying POK for TON");
@@ -325,7 +350,7 @@ contract XPOK {
                     require(self.indexGame == self.lastGameIndex, "Available only on the last day of the lottery");
                     require(self.isLotteryStarted == true, "Lottery is not started");
                     require(msg.amount >= self.ticketPOKPrice, "Not enough POK to buy a ticket");
-                    require(ctx.value >= COMMISSION * 4, "Not enough TON to buy a ticket");
+                    require(ctx.value >= self.fee * 4, "Not enough TON to buy a ticket");
                     require(self.ticketsSold - self.ticketsSoldBefore < self.maxTickets, "Max tickets limit reached");
                     let tickets: Int = msg.amount / self.ticketPOKPrice;
                     throwUnless(MaxTicketsCount, tickets < 251);
@@ -352,7 +377,7 @@ contract XPOK {
             errorComment.append("Something went wrong (");
             errorComment.append(error.toString());
             errorComment.append(")");
-            transferTokensTo(self.pokJettonWalletAddress, msg.sender, msg.amount, errorComment.toString());
+            transferTokensTo(self.pokJettonWalletAddress, msg.sender, msg.amount, errorComment.toString(), self.fee);
         }        
     }
 
@@ -360,7 +385,7 @@ contract XPOK {
         throwUnless(ErrorUnauthorized, sender() == self.owner);
         throwUnless(ErrorLockNotOver, now() > self.lockEndDate);
         let pokAmount: Int = msg.pokAmount != null ? msg.pokAmount!! : self.allPOKBalance;
-        transferTokensTo(self.pokJettonWalletAddress, sender(), pokAmount, "Transfer all POKs");
+        transferTokensTo(self.pokJettonWalletAddress, sender(), pokAmount, "Transfer all POKs", self.fee);
         self.allPOKBalance = 0;
         self.pokBalance = 0;
     }
@@ -368,10 +393,10 @@ contract XPOK {
     receive(msg: WTHCoinsBalances) {
         throwUnless(ErrorUnauthorized, sender() == self.owner);
         throwUnless(ErrorLockNotOver, now() > self.lockEndDate);
-        transferTokensTo(self.pokJettonWalletAddress, sender(), self.allPOKBalance, "Transfer POKs to owner");
+        transferTokensTo(self.pokJettonWalletAddress, sender(), self.allPOKBalance, "Transfer POKs to owner", self.fee);
         self.pokBalance = 0;
         self.additionalPrize = 0;
-        self.workTon = COMMISSION;
+        self.workTon = self.fee;
         self.isLotteryStarted = false;
         self.ticketsSold = 0;
         self.ticketsSoldBefore = 0;
@@ -387,10 +412,10 @@ contract XPOK {
         throwUnless(ErrorUnauthorized, sender()==contractAddress(initOf StorageContract(myAddress(), msg.participant)));
         try {
             throwUnless(ErrorNoTickets, msg.amount != 0);
-            transferTokensTo(self.pokJettonWalletAddress, msg.participant, msg.amount, "Your full win");
+            transferTokensTo(self.pokJettonWalletAddress, msg.participant, msg.amount, "Your full win", self.fee);
             self.allPOKBalance -= msg.amount;
         } catch (error) {
-            sendComment(msg.participant, "You have no tickets!");
+            sendComment(msg.participant, "You have no tickets!", self.fee);
         }
     }
 
@@ -398,7 +423,7 @@ contract XPOK {
         let roundIndex: Int = self.indexLoop * 1000 + self.indexGame;
         let init: StateInit = initOf RoundContract(myAddress(), roundIndex);
         let ticketsSoldPerRound: Int = self.ticketsSold - self.ticketsSoldBefore;
-        let sendValue: Int = COMMISSION * 3;
+        let sendValue: Int = self.fee * 3;
         message(MessageParameters{
             to: contractAddress(init),
             body: PrizePoolForRound{amount: prize, addPrize: addPrize, ticketsSold: ticketsSoldPerRound, ticketsWin: self.winTickets}.toCell(),
@@ -434,7 +459,7 @@ contract XPOK {
                 winningProbability: self.winningProbability
             }.toCell(),
             mode: SendIgnoreErrors | SendPayFwdFeesSeparately,
-            value: COMMISSION
+            value: self.fee * 2
         });
     }
 
@@ -518,7 +543,7 @@ contract XPOK {
     }
 
     get fun commission(): Int {
-        return COMMISSION;
+        return self.fee;
     }
 
     get fun additional_prize(): Int {
@@ -582,7 +607,7 @@ contract XPOK {
     }
 
     get fun win_commission(numRound: Int): Int {
-        return (numRound * (COMMISSION * 3) + COMMISSION);
+        return (numRound * (self.fee * 3) + self.fee);
     }
 
     get fun owner(): Address {

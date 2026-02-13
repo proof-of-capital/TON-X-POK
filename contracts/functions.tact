@@ -14,7 +14,7 @@ fun sendTon(to: Address, value: Int, comment: String) {
     });
 }
 
-fun transferTokensTo(toAddress: Address, recipient: Address, amount: Int, comment: String) {
+fun transferTokensTo(toAddress: Address, recipient: Address, amount: Int, comment: String, fee: Int) {
     let textComment: StringBuilder = beginString();
         textComment.append(comment);
 
@@ -25,7 +25,7 @@ fun transferTokensTo(toAddress: Address, recipient: Address, amount: Int, commen
 
     message(MessageParameters{
             to: toAddress,
-            value: COMMISSION,
+            value: fee,
             body: JettonTransfer{
                 queryId: now(),
                 amount: amount,
@@ -38,11 +38,11 @@ fun transferTokensTo(toAddress: Address, recipient: Address, amount: Int, commen
     });
 }
 
-inline fun sendComment(recipient: Address, comment: String) {
+inline fun sendComment(recipient: Address, comment: String, fee: Int) {
     message(MessageParameters{
         to: recipient,
         body: comment.asComment(),
-        value: COMMISSION,
+        value: fee,
         bounce: false
     });
 }
