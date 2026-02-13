@@ -6,6 +6,7 @@ import { CONTRACTADDRESS } from './!YOURCONTRACTADDRESS';
 
 export async function run(provider: NetworkProvider) {
     const contractAddress = Address.parse(CONTRACTADDRESS); 
+    let START_DATE = Math.floor(Date.now() / 1000) + 60; // Start date set to 1 minute from now
     
     const superContract = provider.open(
         XPOK.fromAddress(contractAddress)
@@ -19,6 +20,7 @@ export async function run(provider: NetworkProvider) {
         {
             $$type: 'ChangeLastGameIndex',
             newLastGameIndex: 2n,
+            startDate: BigInt(START_DATE)
         }
     );
 }
