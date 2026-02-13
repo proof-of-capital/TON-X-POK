@@ -28,7 +28,7 @@ contract RoundContract {
 
     allWinners: Int as uint16 = 0;
 
-    // хранение количества победителей и выигрышей
+    // storage for winners info, max 16 levels, can be changed if needed
     winnersNum1: Int as uint16 = 0;
     winnersAmount1: Int as coins = 0;
 

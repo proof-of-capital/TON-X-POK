@@ -19,7 +19,7 @@ struct RoundTicketInfo {
 contract StorageContract {
     xpok: Address;
     participant: Address;
-    winTickets: map<Int as uint16, Int as uint16>; // можно хранить адрес раунда + количество выигрышных билетов либо сделать функцию, которая будет генерить адреса раундов и сверять, что типа адрес отправителя правильный
+    winTickets: map<Int as uint16, Int as uint16>; 
     fullWin: Int as coins;
     mapLen: Int as uint16;
     lock: Int as uint32 = 0;
@@ -108,30 +108,30 @@ contract StorageContract {
         }
     }
 
-    receive(msg: SendWinForFull) {
-        //отправляется раундом для отправки выигрыша за полный выигрыш        
+    receive(msg: SendWinForFull) {    
+        // Send winnings by round for full win processing    
         let init: StateInit = initOf RoundContract(self.xpok, msg.index);
         throwUnless(401, sender() == contractAddress(init));
         self.fullWin += msg.amount;
-        let ticketsForRound: Int? = self.winTickets.get(msg.index); // сколько билетов сейчас на указанном раунде
-        if(ticketsForRound != null ){ // если билеты есть
-            let newTicketsCount: Int = ticketsForRound!! - msg.tickets; // сколько останется после обработки этого сообщения
-            if( newTicketsCount > 0 ){ // если что-то осталось, обновляем значение
+        let ticketsForRound: Int? = self.winTickets.get(msg.index);
+        if(ticketsForRound != null ){ // if tickets exist
+            let newTicketsCount: Int = ticketsForRound!! - msg.tickets; 
+            if( newTicketsCount > 0 ){ 
                 self.winTickets.set(msg.index, newTicketsCount);
-            } else { // если ничего не осталось, удаляем запись
+            } else { // if nothing is left, delete the entry
                 let _ = self.winTickets.del(msg.index);
                 self.mapLen -= 1;
             }
         }
-        self.lock = 0; // сбрасываем блокировку после получения выигрыша
-        // смотрим есть ли еще раунды с билетами
+        self.lock = 0; // reset the lock after receiving the prize
+        // check if there are more rounds with tickets
         let firstAvailableRoundInfo: RoundTicketInfo?  = self.getFirstAvailableRoundInfo(msg.roundId);
-        if (firstAvailableRoundInfo != null) { // если такой раунд нашёлся
-            // отправляем запрос на получение выигрыша за следующий раунд
-            // берём либо сколько осталось, либо максимум за раз
+        if (firstAvailableRoundInfo != null) { // if such a round is found
+            // send request to receive winnings for the next round
+            // take what's left or maximum per transaction
             let ticketsToClaim = min(firstAvailableRoundInfo!!.ticketsCount, TICKETS_PER_TRANSACTION);
             let commission: Int = calculateCommission(ticketsToClaim);
-            if (myBalance() > commission + COMMISSION) { // если хватает баланса на комиссию
+            if (myBalance() > commission + COMMISSION) { // if there's enough balance for commission
                 let toLeaveOnBalance = (myBalance() - context().value) + myStorageDue();
                 nativeReserve(toLeaveOnBalance, ReserveAtMost);
                 message(MessageParameters{
@@ -144,7 +144,7 @@ contract StorageContract {
                     }.toCell(),
                     mode: SendRemainingBalance,
                 });
-                self.lock = now(); // ставим блокировку
+                self.lock = now(); // set the lock
             }
         }    
     }
@@ -168,7 +168,7 @@ contract StorageContract {
     fun getFirstAvailableRoundInfo(currentRoundId: Int): RoundTicketInfo? {
         foreach (roundId, ticketsCount in self.winTickets) {
             if (roundId == currentRoundId) {
-                return null; // если раунд совпал с текущим, значит этот раунд ещё не закончился
+                return null; // if the round matches the current one, this round hasn't ended yet
             }
             if (ticketsCount > 0) {
                 return RoundTicketInfo{
@@ -177,7 +177,7 @@ contract StorageContract {
                 };
             }
         }
-        return null; // вернём нул если прошлись по всем, но раунд с билетами не нашли
+        return null; // return null if we went through all but didn't find a round with tickets
     }
 
     get fun full_win(): Int {
