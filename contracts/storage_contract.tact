@@ -146,9 +146,7 @@ contract StorageContract {
                 });
                 self.lock = now(); // ставим блокировку
             }
-        }else{ // если раундов больше нет, отправляем полный выигрыш, если хватает комиссии
-            self.sendFullWin(); 
-        }      
+        }    
     }
 
     inline fun sendFullWin() {

@@ -13,46 +13,51 @@ import "./messages";
 import "./functions.tact";
 
 contract XPOK {
-    // адреса
-    owner: Address; // адрес владельца
-    marketMaker: Address; // адрес ММ
-    pokJettonMasterAddress: Address; // адрес контракта-мастера POK 
-    pokJettonWalletAddress: Address; // адрес контракта-кошелька POK для контракта-лотереи
-    royaltyWallet: Address; // адрес роялти для вывода комиссии ?? с чего идет тогда комиссия
+    // addresses
+    owner: Address; // owner address
+    pocContract: Address; // market maker address
+    pokJettonMasterAddress: Address; // POK jetton master contract address
+    pokJettonWalletAddress: Address; // POK jetton wallet contract address for lottery contract
+    royaltyWallet: Address; // royalty wallet address for withdrawing commission (TBD: commission source)
 
     additionalJettonWalletAddress: Address;
     additionalJettonMasterAddress: Address;
 
-    // балансы
-    pokBalance: Int as coins; // баланс POK с покупки билетов в последний день и транзакции ММ ??
-    additionalPrize: Int as coins; // баланс дополнительного приза на каждый раунд (первое пополнение ММ POK, разделенное на количество дней лотереи), хранит сумму на 1 раунд
-    tons: Int as coins; // баланс TON, отправляемых каждый день ММ, для последнего дня ?? джекпот ?? поменять название переменной на более явную
-    workTon: Int as coins; // баланс "рабочих" тонов, которыми поплняет контракт владелец
-    allPOKBalance: Int as coins; // баланс всех POK, которые приходят на контракт (ввиду остутствия встроенных методов их отслеживания)
+    // balances
+    pokBalance: Int as coins; // POK balance from last-day ticket purchases and market maker transactions
+    additionalPrize: Int as coins; // balance of additional prize per round (first MM POK top-up divided by number of lottery days), stores amount for 1 round
+    tons: Int as coins; // TON balance sent daily by MM for the last day (jackpot); TODO: rename variable to be more explicit
+    workTon: Int as coins; // balance of "working" TONs deposited to the contract by the owner
+    allPOKBalance: Int as coins; // balance of all POK received by the contract (because there is no built-in way to track them)
 
-    // изменяемые цены
-    ticketPOKPrice: Int as coins; // цена билета в POK
+    // changeable prices
+    ticketPOKPrice: Int as coins; // ticket price in POK
     
-    // дополнительные значения по переменной
-    isLotteryStarted: Bool; // Флаг старта лотереи, на случай экстренной необходимости остановки лотереии ?? нужен или нет, мало весит, так как булево значение
-    indexGame: Int as uint16; // Индекс (порядковый номер) игры (необходим для деплоя раундов и отслеживания последней 30 игры)
+    // additional state variables
+    isLotteryStarted: Bool; // lottery start flag, used in case of emergency stop; cheap as it is just a boolean
+    indexGame: Int as uint16; // game index (sequence number), needed to deploy rounds and track the last (30th) game
     indexLoop: Int as uint16;
-    levelIndex: Int as uint8; // Индекс с которого стартует распределение основного приза (задается при деплое)
-    winningProbability: Int as uint8; // Вероятность выигрыша в соотношении 1 к n
+    levelIndex: Int as uint8; // index from which main prize distribution starts (set at deploy)
+    winningProbability: Int as uint8; // winning probability in ratio 1 to N
 
-    // переменные по билетам
-    ticketsSold: Int as uint32; // Общее количество проданных билетов
-    ticketsSoldBefore: Int as uint32; // Количество проданных билетов на предыдущем раунде, ?? количество проданных билетов на текущем раунде вычисляется как разность общего количества и количества на предыдущем раунде
-    winTickets: Int as uint32; // Количество выигрышных билетов
-    maxTickets: Int as uint64; // Максимально количество билетов на раунд (задается при деплое)
+    // ticket-related variables
+    ticketsSold: Int as uint32; // total number of sold tickets
+    ticketsSoldBefore: Int as uint32; // number of tickets sold in previous round; current round tickets = total sold - previous round sold
+    winTickets: Int as uint32; // number of winning tickets
+    maxTickets: Int as uint64; // maximum number of tickets per round (set at deploy)
 
-    // даты
-    startedDate: Int as uint32; // Стартовая дата лотереи, то есть дата начала каждого раунда
-    lockEndDate: Int as uint32; // Дата окончания лока между одним запуском лотереи и следующим
+    // dates
+    startedDate: Int as uint32; // lottery start date, i.e. the start date of each round
+    lockEndDate: Int as uint32; // end date of lock period between lottery runs
 
     lastGameIndex: Int as uint16;
 
-    tonBalance: Int as coins; // баланс тонов с покупки участниками билетов
+    tonBalance: Int as coins; // TON balance from participants buying tickets
+
+    fee: Int as coins = 0;
+    roundCapacity: Int as coins = 0;
+    lockDate: Int as uint32 = 0;   
+    isWaitingForWin: Bool = false;
 
     init(owner: Address,
         pokJettonMasterAddress: Address,
@@ -64,13 +69,13 @@ contract XPOK {
         winningProbability: Int,
         maxTickets: Int) {
         self.owner = owner;
-        self.marketMaker = marketMaker;
+        self.pocContract = marketMaker;
         self.royaltyWallet = royaltyWallet;
         self.pokJettonMasterAddress = pokJettonMasterAddress;
         self.pokJettonWalletAddress = owner;
         self.pokBalance = 0;
         self.additionalPrize = 0;
-        self.ticketPOKPrice = 1_500 * NANO_COINS_VALUES; // не задаем начальные значения цен нулевыми ??
+        self.ticketPOKPrice = 1_500 * NANO_COINS_VALUES; // do not set initial prices to zero
         self.startedDate = startedDate;
         self.workTon = 0;
 
@@ -87,12 +92,13 @@ contract XPOK {
         self.allPOKBalance = 0;
         self.levelIndex = levelIndex;
         self.lastGameIndex = lastGameIndex;
-        self.winningProbability = winningProbability; // Коэффициент (отношение) выигрыша в формате "1 к X", для меньшего диапазона в рандоме ??
+        self.winningProbability = winningProbability; // winning coefficient (ratio) in format "1 to X", used to narrow the random range
 
         self.maxTickets = maxTickets;
 
         self.additionalJettonWalletAddress = owner;
         self.additionalJettonMasterAddress = owner;
+
 
         message(MessageParameters{ 
             to: self.pokJettonMasterAddress,
@@ -168,20 +174,6 @@ contract XPOK {
         throwUnless(ErrorUnauthorized, sender() == self.owner);
         require(msg.newOwnerAddress != newAddress(0, 0) && msg.newOwnerAddress != self.owner, "New owner address cannot be null or equal to current owner");
         self.owner = msg.newOwnerAddress;
-        cashback(sender());
-    }
-
-    receive(msg: ChangeMarketMaker) {
-        throwUnless(ErrorUnauthorized, sender() == self.owner);
-        require(msg.newMarketMakerAddress != newAddress(0, 0) && msg.newMarketMakerAddress != self.marketMaker, "New owner address cannot be null or equal to current market maker");
-        self.marketMaker = msg.newMarketMakerAddress;
-        cashback(sender());
-    }
-
-    receive(msg: ChangeRoyalty) {
-        throwUnless(ErrorUnauthorized, sender() == self.owner);
-        require(msg.newRoyaltyAddress != newAddress(0, 0) && msg.newRoyaltyAddress != self.royaltyWallet, "New owner address cannot be null or equal to current royalty wallet");
-        self.royaltyWallet = msg.newRoyaltyAddress;
         cashback(sender());
     }
 
@@ -282,7 +274,7 @@ contract XPOK {
     }
 
     receive(msg: Win) {
-        //отправляется юзером для получения выигрыша
+        // sent by user to claim the full win
         try {
             throwUnless(ErrorNotEnoughTons, context().value >= COMMISSION * 4);
             let init: StateInit = initOf StorageContract(myAddress(), sender());
@@ -305,10 +297,10 @@ contract XPOK {
         throwUnless(ErrorOnlyPOKCanbeUsed, sender() == self.pokJettonWalletAddress);
         try {
             if (self.indexGame >= 1) {
-                if (msg.sender == self.marketMaker && self.indexGame < self.lastGameIndex) { // сделать отправку сообщения на контракт с ПОК для закупки (то есть отправляем все TON разными сообщениями и получаем ПОК)
-                    //тут надо посчитать комиссии, это отправляет маркетмейкер если не последний раунд
+                if (msg.sender == self.pocContract && self.indexGame < self.lastGameIndex) { // TODO: send message to POK contract for buying (send all TONs in separate messages and receive POK)
+                    // need to calculate commissions here; this is sent by market maker if not the last round
                     throwUnless(ErrorLotteryNotStarted, self.isLotteryStarted == true);
-                    // цена ПОК в каких-то диапазонах
+                    // POK price in certain ranges
                     self.allPOKBalance += msg.amount;
                     sendTon(msg.sender, self.tonBalance, "Buying POK for TON");
                     self.tonBalance = 0;
@@ -316,7 +308,7 @@ contract XPOK {
                     self.sendRoundContractGetWinMsg(msg.amount, self.additionalPrize);
                     self.indexGame += 1;
                     self.deployRound();
-                } else if (msg.sender == self.marketMaker && self.indexGame == self.lastGameIndex) {
+                } else if (msg.sender == self.pocContract && self.indexGame == self.lastGameIndex) {
                     throwUnless(ErrorLotteryNotStarted, self.isLotteryStarted == true);
                     let royaltyProfit: Int = msg.amount / 10;
                     transferTokensTo(self.pokJettonWalletAddress, self.royaltyWallet, royaltyProfit, "Royalty profit");
@@ -470,7 +462,7 @@ contract XPOK {
     }
 
     get fun market_maker(): Address {
-        return self.marketMaker;
+        return self.pocContract;
     }
 
     get fun pok_jetton_master(): Address {
