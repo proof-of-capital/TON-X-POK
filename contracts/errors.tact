@@ -17,3 +17,4 @@ const ErrorNotEnoughTonsToBuyTicket: Int = 515; // "Not enough TONs to buy a tic
 const ErrorOnlyPOKCanbeUsed: Int = 516; // "Only POK can be used"
 const ErrorNoTickets: Int = 517; // "You have no tickets"
 const MaxTicketsCount: Int = 518; // "You can buy up to 250 tickets at once"
+const ErrorIsWaitingForWin: Int = 519; // "The lottery is waiting for win now"

@@ -108,7 +108,28 @@ contract XPOK {
         });
     }
 
-    receive(){}
+    receive(msg: FinishRound) {
+        throwUnless(ErrorNotEnoughTonsForCommission, context().value >= self.fee * (6 + 2));
+        throwUnless(ErrorLotteryNotStarted, self.isLotteryStarted == true);
+        throwUnless(ErrorIsWaitingForWin, self.isWaitingForWin == false);
+        self.isWaitingForWin = true;
+        self.tonBalance = 0;
+        let toLeaveOnBalance = (myBalance() - (context().value - self.fee * (6 + 2)) - self.tons) + myStorageDue();
+        nativeReserve(toLeaveOnBalance, ReserveAtMost);
+        message(MessageParameters{
+            to: self.pocContract,
+            value: 0,
+            mode: SendRemainingBalance,
+            body: null
+        });
+    }
+
+    receive(){
+        if(sender() == self.pocContract){
+            self.isWaitingForWin = false;
+            //для сброса флага или смены раунда? как меняем раунд?
+        }
+    }
 
     receive(msg: FetchXPOKRequest) {
         require(context().value > self.fee, "Not enought fee");
@@ -211,14 +232,19 @@ contract XPOK {
     receive(msg: ChangeLastGameIndex) {
         throwUnless(ErrorUnauthorized, sender() == self.owner);
         throwUnless(ErrorInvalidLastGameIndexRange, msg.newLastGameIndex > self.indexGame && msg.newLastGameIndex <= 31);
+        if(self.lockEndDate < msg.startDate + self.lastGameIndex * TWENTY_FOUR_HOURS){
+            self.lockEndDate = msg.startDate + self.lastGameIndex * TWENTY_FOUR_HOURS;
+        }
         self.lastGameIndex = msg.newLastGameIndex;
         cashback(sender());
     }
 
     receive(msg: ExtendLockTimeByDays) {
         throwUnless(ErrorUnauthorized, sender() == self.owner);
-        throwUnless(ErrorInvalidAdditionalDaysRange, msg.additionalDays > 0 && msg.additionalDays <= 31);
-        self.lockEndDate += msg.additionalDays * 86_400;
+        throwUnless(ErrorInvalidAdditionalDaysRange, msg.additionalDays > 0 );
+        let newLockEndDate = msg.additionalDays * TWENTY_FOUR_HOURS;
+        throwUnless(ErrorInvalidAdditionalDaysRange, newLockEndDate < (self.lockDate - TWO_DAYS));
+        self.lockEndDate += newLockEndDate;
         cashback(sender());
     }
 
@@ -232,6 +258,9 @@ contract XPOK {
             self.indexGame += 1;
             self.isLotteryStarted = true;
             let roundIndex: Int = self.indexLoop * 1000 + self.indexGame;
+            if(self.lockEndDate < msg.startDate + self.lastGameIndex * TWENTY_FOUR_HOURS){
+                self.lockEndDate = msg.startDate + self.lastGameIndex * TWENTY_FOUR_HOURS;
+            }
             let toLeaveOnBalance = (myBalance() - context().value) + myStorageDue();
             nativeReserve(toLeaveOnBalance, ReserveAtMost);
             deploy(DeployParameters{
@@ -254,14 +283,14 @@ contract XPOK {
             throwUnless(ErrorNotEnoughTonsToBuyTicket, ctx.value >= TICKET_TON_PRICE + self.fee * 3);
             throwUnless(ErrorMaxTicketsReached, self.ticketsSold - self.ticketsSoldBefore < self.maxTickets);
             let tickets: Int = (ctx.value - self.fee * 3) / TICKET_TON_PRICE;
-            throwUnless(MaxTicketsCount, tickets < 251);
+            let maxTicketsByCapacity: Int = self.roundCapacity / TICKET_TON_PRICE;
+            throwUnless(MaxTicketsCount, tickets < min(251, maxTicketsByCapacity));
             let allTicketsPrice = tickets * TICKET_TON_PRICE;
             let winTickets: Int = self.checkWinTickets(tickets);
 
             let toLeaveOnBalance = (myBalance() - (ctx.value - allTicketsPrice)) + myStorageDue();
             nativeReserve(toLeaveOnBalance, ReserveAtMost);
-            if(winTickets > 0) {
-                
+            if(winTickets > 0) {                
                 let index: Int = self.indexLoop * 1000 + self.indexGame;
                 if (msg.isNewUser) {
                     deploy(DeployParameters{

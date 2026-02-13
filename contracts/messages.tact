@@ -124,6 +124,7 @@ message(0x14) NewOwner {
 
 message(0x15) ChangeLastGameIndex {
     newLastGameIndex: Int as uint16;
+    startDate: Int as uint32;
 }
 
 message(0x16) ExtendLockTimeByDays {
@@ -132,6 +133,7 @@ message(0x16) ExtendLockTimeByDays {
 
 message(0x17) InitializeSeason {
     pokAmount: Int as coins;
+    startDate: Int as uint32;
 }
 
 message(0x18) WithdrawFromRound {
@@ -154,3 +156,5 @@ message(0x22) FetchXPOKResponse {
     fee: Int as coins;
     isTonCollateral: Bool;
 }
+
+message(0x23) FinishRound {}
